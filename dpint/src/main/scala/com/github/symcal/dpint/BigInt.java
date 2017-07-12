@@ -89,7 +89,7 @@ public class BigInt extends Number implements Comparable<BigInt1>
      *
      * @param sign	The sign of the number.
      * @param v		The magnitude of the number, the first position gives the least significant 8 bits.
-     * @param len	The (first) number of entries of v that are considered part of the number.
+     * @param vlen	The (first) number of entries of v that are considered part of the number.
      * @complexity	O(n)
      */
     public BigInt(final int sign, final byte[] v, int vlen)

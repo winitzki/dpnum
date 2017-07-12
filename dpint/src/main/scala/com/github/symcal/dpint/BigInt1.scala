@@ -165,41 +165,38 @@ object BigInt1 {
     val z0 = kmul(x, y, off, b)
     val x2 = new Array[Int](n - b + 1)
     val y2 = new Array[Int](n - b + 1)
-    var carry = 0
-    var i: Int = 0
+    var carry = 0L
+    var ii = 0
 
-    while (i < b) {
-      carry = (x(off + b + i) & mask) + (x(off + i) & mask) + carry
-      x2(i) = carry.toInt
+    while (ii < b) {
+      carry = (x(off + b + ii) & mask) + (x(off + ii) & mask) + carry
+      x2(ii) = carry.toInt
       carry >>>= 32
-
-      i += 1
+      ii += 1
     }
     if ((n & 1) != 0) x2(b) = x(off + b + b)
     if (carry != 0) if ( {
-      x2(b) += 1;
+      x2(b) += 1
       x2(b)
     } == 0) {
-      x2(b + 1) += 1;
-      x2(b + 1)
+      x2(b + 1) += 1
     }
     carry = 0
     var i = 0
     while ( {
-      i < b
+      ii < b
     }) {
-      carry = (y(off + b + i) & mask) + (y(off + i) & mask) + carry
-      y2(i) = carry.toInt
+      carry = (y(off + b + ii) & mask) + (y(off + ii) & mask) + carry
+      y2(ii) = carry.toInt
       carry >>>= 32
-        i += 1
+      ii += 1
     }
     if ((n & 1) != 0) y2(b) = y(off + b + b)
     if (carry != 0) if ( {
-      y2(b) += 1;
+      y2(b) += 1
       y2(b)
     } == 0) {
-      y2(b + 1) += 1;
-      y2(b + 1)
+      y2(b + 1) += 1
     }
     val z1 = kmul(x2, y2, 0, n - b + (if (x2(n - b) != 0 || y2(n - b) != 0) 1
     else 0))
@@ -210,43 +207,37 @@ object BigInt1 {
     carry = 0
     var i = 0
     while ( {
-      i < 2 * b
+      ii < 2 * b
     }) {
-      carry = (z(i + b) & mask) + (z1(i) & mask) - (z2(i) & mask) - (z0(i) & mask) + carry
-      z(i + b) = carry.toInt
-      carry >>= 32 {
-        i += 1;
-        i - 1
-      }
+      carry = (z(ii + b) & mask) + (z1(ii) & mask) - (z2(ii) & mask) - (z0(ii) & mask) + carry
+      z(ii + b) = carry.toInt
+      carry >>= 32
+      ii += 1
     }
     while ( {
-      i < 2 * (n - b)
+      ii < 2 * (n - b)
     }) {
-      carry = (z(i + b) & mask) + (z1(i) & mask) - (z2(i) & mask) + carry
-      z(i + b) = carry.toInt
-      carry >>= 32 {
-        i += 1;
-        i - 1
-      }
+      carry = (z(ii + b) & mask) + (z1(ii) & mask) - (z2(ii) & mask) + carry
+      z(ii + b) = carry.toInt
+      carry >>= 32
+      ii += 1
+
     }
     while ( {
-      i < z1.length
+      ii < z1.length
     }) {
-      carry = (z(i + b) & mask) + (z1(i) & mask) + carry
-      z(i + b) = carry.toInt
-      carry >>= 32 {
-        i += 1;
-        i - 1
-      }
+      carry = (z(ii + b) & mask) + (z1(ii) & mask) + carry
+      z(ii + b) = carry.toInt
+      carry >>= 32
+      ii += 1
     }
     if (carry != 0) while ( {
       {
-        z(i + b) += 1;
-        z(i + b)
+        z(ii + b) += 1
+        z(ii + b)
       } == 0
     }) {
-      i += 1;
-      i
+      ii += 1
     }
     z
   }
@@ -279,45 +270,40 @@ object BigInt1 {
     })
     val x2 = new Array[Int](n - b + 1)
     val y2 = new Array[Int](n - b + 1)
-    var carry = 0
-    var i = 0
+    var carry = 0L
+    var iii = 0
     while ( {
-      i < b
+      iii < b
     }) {
-      carry = (x(off + b + i) & mask) + (x(off + i) & mask) + carry
-      x2(i) = carry.toInt
-      carry >>>= 32 {
-        i += 1;
-        i - 1
-      }
+      carry = (x(off + b + iii) & mask) + (x(off + iii) & mask) + carry
+      x2(iii) = carry.toInt
+      carry >>>= 32
+      iii += 1
+
     }
     if ((n & 1) != 0) x2(b) = x(off + b + b)
     if (carry != 0) if ( {
-      x2(b) += 1;
+      x2(b) += 1
       x2(b)
     } == 0) {
-      x2(b + 1) += 1;
-      x2(b + 1)
+      x2(b + 1) += 1
     }
     carry = 0
     var i = 0
     while ( {
-      i < b
+      iii < b
     }) {
-      carry = (y(off + b + i) & mask) + (y(off + i) & mask) + carry
-      y2(i) = carry.toInt
-      carry >>>= 32 {
-        i += 1;
-        i - 1
-      }
+      carry = (y(off + b + iii) & mask) + (y(off + iii) & mask) + carry
+      y2(iii) = carry.toInt
+      carry >>>= 32
+      iii += 1
     }
     if ((n & 1) != 0) y2(b) = y(off + b + b)
     if (carry != 0) if ( {
-      y2(b) += 1;
+      y2(b) += 1
       y2(b)
     } == 0) {
-      y2(b + 1) += 1;
-      y2(b + 1)
+      y2(b + 1) += 1
     }
     val mid = pool.submit(new Callable[Array[Int]]() {
       @throws[Exception]
@@ -335,43 +321,36 @@ object BigInt1 {
     carry = 0
     var i = 0
     while ( {
-      i < 2 * b
+      iii < 2 * b
     }) {
-      carry = (z(i + b) & mask) + (z1(i) & mask) - (z2(i) & mask) - (z0(i) & mask) + carry
-      z(i + b) = carry.toInt
-      carry >>= 32 {
-        i += 1;
-        i - 1
-      }
+      carry = (z(iii + b) & mask) + (z1(iii) & mask) - (z2(iii) & mask) - (z0(iii) & mask) + carry
+      z(iii + b) = carry.toInt
+      carry >>= 32
+      iii += 1
     }
     while ( {
-      i < 2 * (n - b)
+      iii < 2 * (n - b)
     }) {
-      carry = (z(i + b) & mask) + (z1(i) & mask) - (z2(i) & mask) + carry
-      z(i + b) = carry.toInt
-      carry >>= 32 {
-        i += 1;
-        i - 1
-      }
+      carry = (z(iii + b) & mask) + (z1(iii) & mask) - (z2(iii) & mask) + carry
+      z(iii + b) = carry.toInt
+      carry >>= 32
+      iii += 1
     }
     while ( {
-      i < z1.length
+      iii < z1.length
     }) {
-      carry = (z(i + b) & mask) + (z1(i) & mask) + carry
-      z(i + b) = carry.toInt
-      carry >>= 32 {
-        i += 1;
-        i - 1
-      }
+      carry = (z(iii + b) & mask) + (z1(iii) & mask) + carry
+      z(iii + b) = carry.toInt
+      carry >>= 32
+      iii += 1
     }
     if (carry != 0) while ( {
       {
-        z(i + b) += 1;
-        z(i + b)
+        z(iii + b) += 1
+        z(iii + b)
       } == 0
     }) {
-      i += 1;
-      i
+      iii += 1
     }
     z
   }
@@ -391,7 +370,7 @@ class BigInt1 extends Number with Comparable[BigInt1] {
   /**
     * The digits of the number, i.e., the magnitude array.
     */
-  private var dig = null
+  private var dig: Array[Int] = _
 
   /**
     * Creates a BigInt from the given parameters.
@@ -407,16 +386,6 @@ class BigInt1 extends Number with Comparable[BigInt1] {
     assign(sign, v, len)
   }
 
-  /**
-    * Creates a BigInt from the given parameters.
-    * The contents of the input-array will be copied.
-    *
-    * @param sign The sign of the number.
-    * @param v    The magnitude of the number, the first position gives the least significant 8 bits.
-    * @param len  The (first) number of entries of v that are considered part of the number.
-    * @complexity O(n)
-    */
-  def this(sign: Int, v: Array[Byte], vlen: Int)
 
   /**
     * Creates a BigInt from the given parameters.
@@ -515,17 +484,15 @@ class BigInt1 extends Number with Comparable[BigInt1] {
     * @complexity O(n)
     */
   private def mulAdd(mul: Int, add: Int) = {
-    var carry = 0
+    var carry = 0L
     var i = 0
     while ( {
       i < len
     }) {
       carry = mul * (dig(i) & BigInt1.mask) + carry
       dig(i) = carry.toInt
-      carry >>>= 32 {
-        i += 1;
-        i - 1
-      }
+      carry >>>= 32
+        i += 1
     }
     if (carry != 0) dig({
       len += 1;
@@ -689,7 +656,7 @@ class BigInt1 extends Number with Comparable[BigInt1] {
     len = 1
     while ( {
       j < s.length
-    }) mulAdd(1 _000_000_000, parse(s, j, j += 9))
+    }) mulAdd(1_000_000_000, parse(s, j, j += 9))
   }
 
   /**
