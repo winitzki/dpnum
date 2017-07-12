@@ -47,11 +47,11 @@ import java.util.concurrent._
   * @author Simon Klein
   * @version 0.7
   */
-object BigInt {
+object BigInt1 {
   /**
     * Used to cast a (base 2^32) digit to a long without getting unwanted sign extension.
     **/
-    private val mask = (1L << 32) - 1
+  private val mask = (1L << 32) - 1
 
   /**
     * Multiplies two magnitude arrays and returns the result.
@@ -65,7 +65,7 @@ object BigInt {
     **/
   private def naiveMul(u: Array[Int], ulen: Int, v: Array[Int], vlen: Int) = {
     val res = new Array[Int](ulen + vlen)
-    var carry = 0
+    var carry = 0L
     var tmp = 0L
     var ui = u(0) & mask
     var j = 0
@@ -76,7 +76,7 @@ object BigInt {
       res(j) = tmp.toInt
       carry = tmp >>> 32
 
-        j += 1
+      j += 1
 
     }
     res(vlen) = carry.toInt
@@ -93,14 +93,14 @@ object BigInt {
         tmp = ui * (v(j) & mask) + (res(i + j) & mask) + carry
         res(i + j) = tmp.toInt
         carry = tmp >>> 32
-        {
-          j += 1; j - 1
-        }
+
+        j += 1
+
       }
       res(i + vlen) = carry.toInt
-      {
-        i += 1; i - 1
-      }
+
+      i += 1
+
     }
     res
   }
@@ -121,7 +121,7 @@ object BigInt {
     // z2 = x1*y1, z0 = x0*y0, z1 = (x1+x0)(y1+y0)-z2-z0
     if (n <= 32) { //Basecase
       val z = new Array[Int](2 * n)
-      var carry = 0
+      var carry = 0L
       var tmp = 0L
       var xi = x(off) & mask
       var j = 0
@@ -131,9 +131,9 @@ object BigInt {
         tmp = xi * (y(off + j) & mask) + carry
         z(j) = tmp.toInt
         carry = tmp >>> 32
-        {
-          j += 1; j - 1
-        }
+
+        j += 1
+
       }
       z(n) = carry.toInt
       var i = 1
@@ -149,14 +149,14 @@ object BigInt {
           tmp = xi * (y(off + j) & mask) + (z(i + j) & mask) + carry
           z(i + j) = tmp.toInt
           carry = tmp >>> 32
-          {
-            j += 1; j - 1
-          }
+
+          j += 1
+
         }
         z(i + n) = carry.toInt
-        {
-          i += 1; i - 1
-        }
+
+        i += 1
+
       }
       return z
     }
@@ -166,22 +166,22 @@ object BigInt {
     val x2 = new Array[Int](n - b + 1)
     val y2 = new Array[Int](n - b + 1)
     var carry = 0
-    var i = 0
-    while ( {
-      i < b
-    }) {
+    var i: Int = 0
+
+    while (i < b) {
       carry = (x(off + b + i) & mask) + (x(off + i) & mask) + carry
       x2(i) = carry.toInt
       carry >>>= 32
-      {
-        i += 1; i - 1
-      }
+
+      i += 1
     }
     if ((n & 1) != 0) x2(b) = x(off + b + b)
     if (carry != 0) if ( {
-      x2(b) += 1; x2(b)
+      x2(b) += 1;
+      x2(b)
     } == 0) {
-      x2(b + 1) += 1; x2(b + 1)
+      x2(b + 1) += 1;
+      x2(b + 1)
     }
     carry = 0
     var i = 0
@@ -191,15 +191,15 @@ object BigInt {
       carry = (y(off + b + i) & mask) + (y(off + i) & mask) + carry
       y2(i) = carry.toInt
       carry >>>= 32
-      {
-        i += 1; i - 1
-      }
+        i += 1
     }
     if ((n & 1) != 0) y2(b) = y(off + b + b)
     if (carry != 0) if ( {
-      y2(b) += 1; y2(b)
+      y2(b) += 1;
+      y2(b)
     } == 0) {
-      y2(b + 1) += 1; y2(b + 1)
+      y2(b + 1) += 1;
+      y2(b + 1)
     }
     val z1 = kmul(x2, y2, 0, n - b + (if (x2(n - b) != 0 || y2(n - b) != 0) 1
     else 0))
@@ -214,9 +214,9 @@ object BigInt {
     }) {
       carry = (z(i + b) & mask) + (z1(i) & mask) - (z2(i) & mask) - (z0(i) & mask) + carry
       z(i + b) = carry.toInt
-      carry >>= 32
-      {
-        i += 1; i - 1
+      carry >>= 32 {
+        i += 1;
+        i - 1
       }
     }
     while ( {
@@ -224,9 +224,9 @@ object BigInt {
     }) {
       carry = (z(i + b) & mask) + (z1(i) & mask) - (z2(i) & mask) + carry
       z(i + b) = carry.toInt
-      carry >>= 32
-      {
-        i += 1; i - 1
+      carry >>= 32 {
+        i += 1;
+        i - 1
       }
     }
     while ( {
@@ -234,17 +234,19 @@ object BigInt {
     }) {
       carry = (z(i + b) & mask) + (z1(i) & mask) + carry
       z(i + b) = carry.toInt
-      carry >>= 32
-      {
-        i += 1; i - 1
+      carry >>= 32 {
+        i += 1;
+        i - 1
       }
     }
     if (carry != 0) while ( {
       {
-        z(i + b) += 1; z(i + b)
+        z(i + b) += 1;
+        z(i + b)
       } == 0
     }) {
-      i += 1; i
+      i += 1;
+      i
     }
     z
   }
@@ -284,16 +286,18 @@ object BigInt {
     }) {
       carry = (x(off + b + i) & mask) + (x(off + i) & mask) + carry
       x2(i) = carry.toInt
-      carry >>>= 32
-      {
-        i += 1; i - 1
+      carry >>>= 32 {
+        i += 1;
+        i - 1
       }
     }
     if ((n & 1) != 0) x2(b) = x(off + b + b)
     if (carry != 0) if ( {
-      x2(b) += 1; x2(b)
+      x2(b) += 1;
+      x2(b)
     } == 0) {
-      x2(b + 1) += 1; x2(b + 1)
+      x2(b + 1) += 1;
+      x2(b + 1)
     }
     carry = 0
     var i = 0
@@ -302,16 +306,18 @@ object BigInt {
     }) {
       carry = (y(off + b + i) & mask) + (y(off + i) & mask) + carry
       y2(i) = carry.toInt
-      carry >>>= 32
-      {
-        i += 1; i - 1
+      carry >>>= 32 {
+        i += 1;
+        i - 1
       }
     }
     if ((n & 1) != 0) y2(b) = y(off + b + b)
     if (carry != 0) if ( {
-      y2(b) += 1; y2(b)
+      y2(b) += 1;
+      y2(b)
     } == 0) {
-      y2(b + 1) += 1; y2(b + 1)
+      y2(b + 1) += 1;
+      y2(b + 1)
     }
     val mid = pool.submit(new Callable[Array[Int]]() {
       @throws[Exception]
@@ -333,9 +339,9 @@ object BigInt {
     }) {
       carry = (z(i + b) & mask) + (z1(i) & mask) - (z2(i) & mask) - (z0(i) & mask) + carry
       z(i + b) = carry.toInt
-      carry >>= 32
-      {
-        i += 1; i - 1
+      carry >>= 32 {
+        i += 1;
+        i - 1
       }
     }
     while ( {
@@ -343,9 +349,9 @@ object BigInt {
     }) {
       carry = (z(i + b) & mask) + (z1(i) & mask) - (z2(i) & mask) + carry
       z(i + b) = carry.toInt
-      carry >>= 32
-      {
-        i += 1; i - 1
+      carry >>= 32 {
+        i += 1;
+        i - 1
       }
     }
     while ( {
@@ -353,29 +359,31 @@ object BigInt {
     }) {
       carry = (z(i + b) & mask) + (z1(i) & mask) + carry
       z(i + b) = carry.toInt
-      carry >>= 32
-      {
-        i += 1; i - 1
+      carry >>= 32 {
+        i += 1;
+        i - 1
       }
     }
     if (carry != 0) while ( {
       {
-        z(i + b) += 1; z(i + b)
+        z(i + b) += 1;
+        z(i + b)
       } == 0
     }) {
-      i += 1; i
+      i += 1;
+      i
     }
     z
   }
 }
 
-class BigInt extends Number with Comparable[BigInt] {
+class BigInt1 extends Number with Comparable[BigInt1] {
   /**
     * The sign of this number.
     * 1 for positive numbers and -1 for negative numbers.
     * Zero can have either sign.
     */
-    private var sign = 0
+  private var sign = 0
   /**
     * The number of digits of the number (in base 2^32).
     **/
@@ -491,7 +499,8 @@ class BigInt extends Number with Comparable[BigInt] {
     var res = s(from) - '0'
     while ( {
       {
-        from += 1; from
+        from += 1;
+        from
       } < to
     }) res = res * 10 + s(from) - '0'
     res
@@ -511,29 +520,33 @@ class BigInt extends Number with Comparable[BigInt] {
     while ( {
       i < len
     }) {
-      carry = mul * (dig(i) & BigInt.mask) + carry
+      carry = mul * (dig(i) & BigInt1.mask) + carry
       dig(i) = carry.toInt
-      carry >>>= 32
-      {
-        i += 1; i - 1
+      carry >>>= 32 {
+        i += 1;
+        i - 1
       }
     }
     if (carry != 0) dig({
-      len += 1; len - 1
+      len += 1;
+      len - 1
     }) = carry.toInt
-    carry = (dig(0) & BigInt.mask) + add
+    carry = (dig(0) & BigInt1.mask) + add
     dig(0) = carry.toInt
     if ((carry >>> 32) != 0) {
       var i = 1
       while ( {
         i < len && {
-          dig(i) += 1; dig(i)
+          dig(i) += 1;
+          dig(i)
         } == 0
       }) {
-        i += 1; i
+        i += 1;
+        i
       }
       if (i == len) dig({
-        len += 1; len - 1
+        len += 1;
+        len - 1
       }) = 1 //Todo: realloc() for general case?
     }
   }
@@ -567,7 +580,7 @@ class BigInt extends Number with Comparable[BigInt] {
     * @return The BigInt copy.
     * @complexity O(n)
     */
-  def copy = new BigInt(sign, util.Arrays.copyOf(dig, len), len)
+  def copy = new BigInt1(sign, util.Arrays.copyOf(dig, len), len)
 
   /**
     * Assigns the given number to this BigInt object.
@@ -575,7 +588,7 @@ class BigInt extends Number with Comparable[BigInt] {
     * @param The BigInt to copy/assign to this BigInt.
     * @complexity O(n)
     */
-  def assign(other: BigInt): Unit = {
+  def assign(other: BigInt1): Unit = {
     sign = other.sign
     assign(other.dig, other.len)
   }
@@ -627,17 +640,20 @@ class BigInt extends Number with Comparable[BigInt] {
       i < tmp
     }) {
       dig(i) = v(j + 3) << 24 | (v(j + 2) & 0xFF) << 16 | (v(j + 1) & 0xFF) << 8 | v(j) & 0xFF {
-        i += 1; i - 1
+        i += 1;
+        i - 1
       }
       j += 4
     }
     if (tmp != len) {
       tmp = v({
-        j += 1; j - 1
+        j += 1;
+        j - 1
       }) & 0xFF
       if (j < vlen) {
         tmp |= (v({
-          j += 1; j - 1
+          j += 1;
+          j - 1
         }) & 0xFF) << 8
         if (j < vlen) tmp |= (v(j) & 0xFF) << 16
       }
@@ -693,10 +709,11 @@ class BigInt extends Number with Comparable[BigInt] {
     sign = s
     len = 2
     if (dig.length < 2) realloc(2)
-    dig(0) = (`val` & BigInt.mask).toInt
+    dig(0) = (`val` & BigInt1.mask).toInt
     dig(1) = (`val` >>> 32).toInt
     if (dig(1) == 0) {
-      len -= 1; len
+      len -= 1;
+      len
     }
   }
 
@@ -750,16 +767,17 @@ class BigInt extends Number with Comparable[BigInt] {
     * @return -1 if the absolute value of this number is less, 0 if it's equal, 1 if it's greater.
     * @complexity O(n)
     */
-  def compareAbsTo(a: BigInt): Int = {
+  def compareAbsTo(a: BigInt1): Int = {
     if (len > a.len) return 1
     if (len < a.len) return -1
     var i = len - 1
     while ( {
       i >= 0
     }) {
-      if (dig(i) != a.dig(i)) if ((dig(i) & BigInt.mask) > (a.dig(i) & BigInt.mask)) return 1
+      if (dig(i) != a.dig(i)) if ((dig(i) & BigInt1.mask) > (a.dig(i) & BigInt1.mask)) return 1
       else return -1 {
-        i -= 1; i + 1
+        i -= 1;
+        i + 1
       }
     }
     0
@@ -772,7 +790,7 @@ class BigInt extends Number with Comparable[BigInt] {
     * @return -1 if the value of this number is less, 0 if it's equal, 1 if it's greater.
     * @complexity O(n)
     */
-  override def compareTo(a: BigInt): Int = {
+  override def compareTo(a: BigInt1): Int = {
     if (sign < 0) {
       if (a.sign < 0 || a.isZero) return -compareAbsTo(a)
       return -1
@@ -788,7 +806,7 @@ class BigInt extends Number with Comparable[BigInt] {
     * @return true if the two numbers are equal, false otherwise.
     * @complexity O(n)
     */
-  def equals(a: BigInt): Boolean = {
+  def equals(a: BigInt1): Boolean = {
     if (len != a.len) return false
     if (isZero && a.isZero) return true
     if ((sign ^ a.sign) < 0) return false
@@ -798,7 +816,8 @@ class BigInt extends Number with Comparable[BigInt] {
       i < len
     }) {
       if (dig(i) != a.dig(i)) return false {
-        i += 1; i - 1
+        i += 1;
+        i - 1
       }
     }
     true
@@ -807,7 +826,7 @@ class BigInt extends Number with Comparable[BigInt] {
   /** {@inheritDoc }
     */
   override def equals(o: Any): Boolean = {
-    if (o.isInstanceOf[BigInt]) return this == o.asInstanceOf[BigInt]
+    if (o.isInstanceOf[BigInt1]) return this == o.asInstanceOf[BigInt1]
     false
   } //Todo: Equality on other Number objects?
   override def hashCode: Int = {
@@ -816,8 +835,9 @@ class BigInt extends Number with Comparable[BigInt] {
     var i = 0
     while ( {
       i < len
-    }) hash = (31 * hash + (dig(i) & BigInt.mask)).toInt {
-      i += 1; i - 1
+    }) hash = (31 * hash + (dig(i) & BigInt1.mask)).toInt {
+      i += 1;
+      i - 1
     }
     sign * hash //relies on 0 --> hash==0.
   }
@@ -847,15 +867,15 @@ class BigInt extends Number with Comparable[BigInt] {
     *
     * @return { @code sign * (this & 0x7FFFFFFFFFFFFFFF)}
     */
-  override def longValue: Long = if (len == 1) sign * (dig(0) & BigInt.mask)
-  else sign * ((dig(1) & 0x7FFFFFFFL) << 32 | (dig(0) & BigInt.mask))
+  override def longValue: Long = if (len == 1) sign * (dig(0) & BigInt1.mask)
+  else sign * ((dig(1) & 0x7FFFFFFFL) << 32 | (dig(0) & BigInt1.mask))
 
   /** {@inheritDoc }
     * Returns this BigInt as a {@code float}.
     *
     * @return the most significant 24 bits in the mantissa (the highest order bit obviously being implicit),
     *         the exponent value which will be consistent for { @code BigInt}s up to 128 bits (should it not fit it'll be calculated modulo 256),
-    *                                                                 and the sign bit set if this number is negative.
+    *         and the sign bit set if this number is negative.
     */
   override def floatValue: Float = {
     val s = Integer.numberOfLeadingZeros(dig(len - 1))
@@ -875,13 +895,13 @@ class BigInt extends Number with Comparable[BigInt] {
     *
     * @return the most significant 53 bits in the mantissa (the highest order bit obviously being implicit),
     *         the exponent value which will be consistent for { @code BigInt}s up to 1024 bits (should it not fit it'll be calculated modulo 2048),
-    *                                                                 and the sign bit set if this number is negative.
+    *         and the sign bit set if this number is negative.
     */
   override def doubleValue: Double = {
-    if (len == 1) return sign * (dig(0) & BigInt.mask)
+    if (len == 1) return sign * (dig(0) & BigInt1.mask)
     val s = Integer.numberOfLeadingZeros(dig(len - 1))
-    if (len == 2 && 32 - s + 32 <= 53) return sign * (dig(1).toLong << 32 | (dig(0) & BigInt.mask))
-    var bits = dig(len - 1).toLong << 32 | (dig(len - 2) & BigInt.mask) //Mask out the 53 MSBits.
+    if (len == 2 && 32 - s + 32 <= 53) return sign * (dig(1).toLong << 32 | (dig(0) & BigInt1.mask))
+    var bits = dig(len - 1).toLong << 32 | (dig(len - 2) & BigInt1.mask) //Mask out the 53 MSBits.
     if (s <= 11) bits >>>= 11 - s
     else bits = bits << s - 11 | dig(len - 3) >>> 32 - (s - 11) //s-11==additional bits we need.
     bits ^= 1L << 52
@@ -899,21 +919,24 @@ class BigInt extends Number with Comparable[BigInt] {
     * @amortized O(1)
     */
   private def uaddMag(a: Int) = {
-    val tmp = (dig(0) & BigInt.mask) + (a & BigInt.mask)
+    val tmp = (dig(0) & BigInt1.mask) + (a & BigInt1.mask)
     dig(0) = tmp.toInt
     if ((tmp >>> 32) != 0) {
       var i = 1
       while ( {
         i < len && {
-          dig(i) += 1; dig(i)
+          dig(i) += 1;
+          dig(i)
         } == 0
       }) {
-        i += 1; i - 1
+        i += 1;
+        i - 1
       }
       if (i == len) {
         if (len == dig.length) realloc()
         dig({
-          len += 1; len - 1
+          len += 1;
+          len - 1
         }) = 1
       }
     }
@@ -928,7 +951,7 @@ class BigInt extends Number with Comparable[BigInt] {
     * @amortized O(1)
     */
   private def usubMag(s: Int) = {
-    val dif = (dig(0) & BigInt.mask) - (s & BigInt.mask)
+    val dif = (dig(0) & BigInt1.mask) - (s & BigInt1.mask)
     dig(0) = dif.toInt
     if ((dif >> 32) != 0) {
       var i = 1
@@ -936,16 +959,20 @@ class BigInt extends Number with Comparable[BigInt] {
         dig(i) == 0
       }) {
         {
-          dig(i) -= 1; dig(i)
+          dig(i) -= 1;
+          dig(i)
         }
         {
-          i += 1; i - 1
+          i += 1;
+          i - 1
         }
       }
       if ( {
-        dig(i) -= 1; dig(i)
+        dig(i) -= 1;
+        dig(i)
       } == 0 && i + 1 == len) {
-        len -= 1; len
+        len -= 1;
+        len
       }
     }
   }
@@ -959,7 +986,7 @@ class BigInt extends Number with Comparable[BigInt] {
     */
   def uadd(a: Int): Unit = {
     if (sign < 0) {
-      if (len > 1 || (dig(0) & BigInt.mask) > (a & BigInt.mask)) {
+      if (len > 1 || (dig(0) & BigInt1.mask) > (a & BigInt1.mask)) {
         usubMag(a)
         return
       }
@@ -982,7 +1009,7 @@ class BigInt extends Number with Comparable[BigInt] {
       uaddMag(s)
       return
     }
-    if (len == 1 && (dig(0) & BigInt.mask) < (s & BigInt.mask)) {
+    if (len == 1 && (dig(0) & BigInt1.mask) < (s & BigInt1.mask)) {
       sign = -1
       dig(0) = s - dig(0)
       return
@@ -1002,22 +1029,23 @@ class BigInt extends Number with Comparable[BigInt] {
       return
       //To be removed?}
       var carry = 0
-      val m = mul & BigInt.mask
+      val m = mul & BigInt1.mask
       var i = 0
       while ( {
         i < len
       }) {
-        carry = (dig(i) & BigInt.mask) * m + carry
+        carry = (dig(i) & BigInt1.mask) * m + carry
         dig(i) = carry.toInt
-        carry >>>= 32
-        {
-          i += 1; i - 1
+        carry >>>= 32 {
+          i += 1;
+          i - 1
         }
       }
       if (carry != 0) {
         if (len == dig.length) realloc()
         dig({
-          len += 1; len - 1
+          len += 1;
+          len - 1
         }) = carry.toInt
       }
     } //mul is interpreted as unsigned
@@ -1035,22 +1063,23 @@ class BigInt extends Number with Comparable[BigInt] {
 
     =
     {
-      val d = div & BigInt.mask
+      val d = div & BigInt1.mask
       var rem = 0
       var i = len - 1
       while ( {
         i >= 0
       }) {
         rem <<= 32
-        rem = rem + (dig(i) & BigInt.mask)
+        rem = rem + (dig(i) & BigInt1.mask)
         dig(i) = (rem / d).toInt //Todo: opt?
-        rem = rem % d
-        {
-          i -= 1; i + 1
+        rem = rem % d {
+          i -= 1;
+          i + 1
         }
       }
       if (dig(len - 1) == 0 && len > 1) {
-        len -= 1; len
+        len -= 1;
+        len
       }
       if (len == 1 && dig(0) == 0) sign = 1
       return rem.toInt
@@ -1061,11 +1090,12 @@ class BigInt extends Number with Comparable[BigInt] {
 
     =
     {
-      val d = div & BigInt.mask
+      val d = div & BigInt1.mask
       val hbit = Long.MIN_VALUE
       var hq = (hbit - 1) / d
       if (hq * d + d == hbit) {
-        hq += 1; hq
+        hq += 1;
+        hq
       }
       val hrem = hbit - hq * d
       var rem = 0
@@ -1073,16 +1103,17 @@ class BigInt extends Number with Comparable[BigInt] {
       while ( {
         i >= 0
       }) {
-        rem = (rem << 32) + (dig(i) & BigInt.mask)
+        rem = (rem << 32) + (dig(i) & BigInt1.mask)
         val q = (hq & rem >> 63) + ((rem & hbit - 1) + (hrem & rem >> 63)) / d
         rem = rem - q * d
-        dig(i) = q.toInt
-        {
-          i -= 1; i + 1
+        dig(i) = q.toInt {
+          i -= 1;
+          i + 1
         }
       }
       if (dig(len - 1) == 0 && len > 1) {
-        len -= 1; len
+        len -= 1;
+        len
       }
       if (len == 1 && dig(0) == 0) sign = 1
       return rem.toInt
@@ -1104,15 +1135,15 @@ class BigInt extends Number with Comparable[BigInt] {
     =
     {
       var rem = 0
-      val d = mod & BigInt.mask
+      val d = mod & BigInt1.mask
       var i = len - 1
       while ( {
         i >= 0
       }) {
         rem <<= 32
-        rem = (rem + (dig(i) & BigInt.mask)) % d
-        {
-          i -= 1; i + 1
+        rem = (rem + (dig(i) & BigInt1.mask)) % d {
+          i -= 1;
+          i + 1
         }
       }
       len = 1
@@ -1125,28 +1156,30 @@ class BigInt extends Number with Comparable[BigInt] {
 
     =
     {
-      val d = mod & BigInt.mask
+      val d = mod & BigInt1.mask
       val hbit = Long.MIN_VALUE
       // Precompute hrem = (1<<63) % d
       // I.e. the remainder caused by the highest bit.
       var hrem = (hbit - 1) % d
       if ( {
-        hrem += 1; hrem
+        hrem += 1;
+        hrem
       } == d) hrem = 0
       var rem = 0
       var i = len - 1
       while ( {
         i >= 0
       }) {
-        rem = (rem << 32) + (dig(i) & BigInt.mask)
+        rem = (rem << 32) + (dig(i) & BigInt1.mask)
         // Calculate rem %= d.
         // Do this by calculating the lower 63 bits and highest bit separately.
         // The highest bit remainder only gets added if it's set.
         rem = ((rem & hbit - 1) + (hrem & rem >> 63)) % d
-        // The addition is safe and cannot overflow.
-        // Because hrem < 2^32 and there's at least one zero bit in [62,32] if bit 63 is set.
+          // The addition is safe and cannot overflow.
+          // Because hrem < 2^32 and there's at least one zero bit in [62,32] if bit 63 is set.
         {
-          i -= 1; i + 1
+          i -= 1;
+          i + 1
         }
       }
       len = 1
@@ -1163,30 +1196,34 @@ class BigInt extends Number with Comparable[BigInt] {
         len = 2
       }
       val ah = a >>> 32
-      val al = a & BigInt.mask
-      var carry = (dig(0) & BigInt.mask) + al
+      val al = a & BigInt1.mask
+      var carry = (dig(0) & BigInt1.mask) + al
       dig(0) = carry.toInt
       carry >>>= 32
-      carry = (dig(1) & BigInt.mask) + ah + carry
+      carry = (dig(1) & BigInt1.mask) + ah + carry
       dig(1) = carry.toInt
       if ((carry >> 32) != 0) {
         var i = 2
         while ( {
           i < len && {
-            dig(i) += 1; dig(i)
+            dig(i) += 1;
+            dig(i)
           } == 0
         }) {
-          i += 1; i - 1
+          i += 1;
+          i - 1
         }
         if (i == len) {
           if (len == dig.length) realloc()
           dig({
-            len += 1; len - 1
+            len += 1;
+            len - 1
           }) = 1
         }
       }
       else if (len == 2 && dig(1) == 0) {
-        len -= 1; len
+        len -= 1;
+        len
       }
     }
 
@@ -1195,11 +1232,11 @@ class BigInt extends Number with Comparable[BigInt] {
     =
     {
       val sh = s >>> 32
-      val sl = s & BigInt.mask
-      var dif = (dig(0) & BigInt.mask) - sl
+      val sl = s & BigInt1.mask
+      var dif = (dig(0) & BigInt1.mask) - sl
       dig(0) = dif.toInt
       dif >>= 32
-      dif = (dig(1) & BigInt.mask) - sh + dif
+      dif = (dig(1) & BigInt1.mask) - sh + dif
       dig(1) = dif.toInt
       if ((dif >> 32) != 0) {
         var i = 2
@@ -1207,20 +1244,25 @@ class BigInt extends Number with Comparable[BigInt] {
           dig(i) == 0
         }) {
           {
-            dig(i) -= 1; dig(i)
+            dig(i) -= 1;
+            dig(i)
           }
           {
-            i += 1; i - 1
+            i += 1;
+            i - 1
           }
         }
         if ( {
-          dig(i) -= 1; dig(i)
+          dig(i) -= 1;
+          dig(i)
         } == 0 && i + 1 == len) {
-          len -= 1; len
+          len -= 1;
+          len
         }
       }
       if (len == 2 && dig(1) == 0) {
-        len -= 1; len
+        len -= 1;
+        len
       }
     }
 
@@ -1233,23 +1275,25 @@ class BigInt extends Number with Comparable[BigInt] {
       */
     def uadd(a: Long) = if (sign < 0) {
       val ah = a >>> 32
-      val al = a & BigInt.mask
-      if (len > 2 || len == 2 && ((dig(1) & BigInt.mask) > ah || (dig(1) & BigInt.mask) == ah && (dig(0) & BigInt.mask) >= al) || ah == 0 && (dig(0) & BigInt.mask) >= al) {
+      val al = a & BigInt1.mask
+      if (len > 2 || len == 2 && ((dig(1) & BigInt1.mask) > ah || (dig(1) & BigInt1.mask) == ah && (dig(0) & BigInt1.mask) >= al) || ah == 0 && (dig(0) & BigInt1.mask) >= al) {
         usubMag(a)
         return
       }
       if (dig.length == 1) realloc(2)
       if (len == 1) dig({
-        len += 1; len - 1
+        len += 1;
+        len - 1
       }) = 0
-      var dif = al - (dig(0) & BigInt.mask)
+      var dif = al - (dig(0) & BigInt1.mask)
       dig(0) = dif.toInt
       dif >>= 32
-      dif = ah - (dig(1) & BigInt.mask) + dif
+      dif = ah - (dig(1) & BigInt1.mask) + dif
       dig(1) = dif.toInt
       //dif>>32 != 0 should be impossible
       if (dif == 0) {
-        len -= 1; len
+        len -= 1;
+        len
       }
       sign = 1
     }
@@ -1263,22 +1307,24 @@ class BigInt extends Number with Comparable[BigInt] {
       */
     def usub(a: Long) = if (sign > 0) {
       val ah = a >>> 32
-      val al = a & BigInt.mask
-      if (len > 2 || len == 2 && ((dig(1) & BigInt.mask) > ah || (dig(1) & BigInt.mask) == ah && (dig(0) & BigInt.mask) >= al) || ah == 0 && (dig(0) & BigInt.mask) >= al) {
+      val al = a & BigInt1.mask
+      if (len > 2 || len == 2 && ((dig(1) & BigInt1.mask) > ah || (dig(1) & BigInt1.mask) == ah && (dig(0) & BigInt1.mask) >= al) || ah == 0 && (dig(0) & BigInt1.mask) >= al) {
         usubMag(a)
         return
       }
       if (dig.length == 1) realloc(2)
       if (len == 1) dig({
-        len += 1; len - 1
+        len += 1;
+        len - 1
       }) = 0
-      var dif = al - (dig(0) & BigInt.mask)
+      var dif = al - (dig(0) & BigInt1.mask)
       dig(0) = dif.toInt
       dif >>= 32
-      dif = ah - (dig(1) & BigInt.mask) + dif
+      dif = ah - (dig(1) & BigInt1.mask) + dif
       dig(1) = dif.toInt
       if (dif == 0) {
-        len -= 1; len
+        len -= 1;
+        len
       }
       sign = -1
     }
@@ -1296,7 +1342,7 @@ class BigInt extends Number with Comparable[BigInt] {
       }
       if (len + 2 >= dig.length) realloc(2 * len + 1)
       val mh = mul >>> 32
-      val ml = mul & BigInt.mask
+      val ml = mul & BigInt1.mask
       var carry = 0
       var next = 0
       var tmp = 0L
@@ -1305,25 +1351,28 @@ class BigInt extends Number with Comparable[BigInt] {
         i < len
       }) {
         carry = carry + next //Could this overflow?
-        tmp = (dig(i) & BigInt.mask) * ml
-        next = (dig(i) & BigInt.mask) * mh
+        tmp = (dig(i) & BigInt1.mask) * ml
+        next = (dig(i) & BigInt1.mask) * mh
         dig(i) = (tmp + carry).toInt
-        carry = (tmp >>> 32) + (carry >>> 32) + ((tmp & BigInt.mask) + (carry & BigInt.mask) >>> 32)
-        {
-          i += 1; i - 1
+        carry = (tmp >>> 32) + (carry >>> 32) + ((tmp & BigInt1.mask) + (carry & BigInt1.mask) >>> 32) {
+          i += 1;
+          i - 1
         }
       }
       carry = carry + next
       dig({
-        len += 1; len - 1
+        len += 1;
+        len - 1
       }) = carry.toInt
       dig({
-        len += 1; len - 1
+        len += 1;
+        len - 1
       }) = (carry >>> 32).toInt
       while ( {
         len > 1 && dig(len - 1) == 0
       }) {
-        len -= 1; len
+        len -= 1;
+        len
       }
     }
 
@@ -1335,22 +1384,22 @@ class BigInt extends Number with Comparable[BigInt] {
       * @complexity O(n)
       */
     def udiv(div: Long) = {
-      if (div == (div & BigInt.mask)) return udiv(div.toInt) & BigInt.mask
+      if (div == (div & BigInt1.mask)) return udiv(div.toInt) & BigInt1.mask
       if (len == 1) {
-        val tmp = dig(0) & BigInt.mask
+        val tmp = dig(0) & BigInt1.mask
         setToZero()
         return tmp
       }
       val s = Integer.numberOfLeadingZeros((div >>> 32).toInt)
       val dh = div >>> 32 - s
-      val dl = (div << s) & BigInt.mask
+      val dl = (div << s) & BigInt1.mask
       val hbit = Long.MIN_VALUE
       var u2 = 0
       var u1 = dig(len - 1) >>> 32 - s
-      var u0 = (dig(len - 1) << s | dig(len - 2) >>> 32 - s) & BigInt.mask
+      var u0 = (dig(len - 1) << s | dig(len - 2) >>> 32 - s) & BigInt1.mask
       if (s == 0) {
         u1 = 0
-        u0 = dig(len - 1) & BigInt.mask
+        u0 = dig(len - 1) & BigInt1.mask
       }
       var j = len - 2
       while ( {
@@ -1358,14 +1407,15 @@ class BigInt extends Number with Comparable[BigInt] {
       }) {
         u2 = u1
         u1 = u0
-        u0 = if (s > 0 && j > 0) (dig(j) << s | dig(j - 1) >>> 32 - s) & BigInt.mask
-        else (dig(j) << s) & BigInt.mask
+        u0 = if (s > 0 && j > 0) (dig(j) << s | dig(j - 1) >>> 32 - s) & BigInt1.mask
+        else (dig(j) << s) & BigInt1.mask
         var k = (u2 << 32) + u1
         //Unsigned division is a pain in the ass! ='(
         var qhat = (k >>> 1) / dh << 1
         var t = k - qhat * dh
         if (t + hbit >= dh + hbit) {
-          qhat += 1; qhat - 1
+          qhat += 1;
+          qhat - 1
         }
         // qhat = (u[j+n]*b + u[j+n-1])/v[n-1];
         var rhat = k - qhat * dh
@@ -1378,34 +1428,36 @@ class BigInt extends Number with Comparable[BigInt] {
           //todo: break is not supported}
           // Multiply and subtract. Unfolded loop.
           var p = qhat * dl
-          t = u0 - (p & BigInt.mask)
-          u0 = t & BigInt.mask
+          t = u0 - (p & BigInt1.mask)
+          u0 = t & BigInt1.mask
           k = (p >>> 32) - (t >> 32)
           p = qhat * dh
-          t = u1 - k - (p & BigInt.mask)
-          u1 = t & BigInt.mask
+          t = u1 - k - (p & BigInt1.mask)
+          u1 = t & BigInt1.mask
           k = (p >>> 32) - (t >> 32)
           t = u2 - k
-          u2 = t & BigInt.mask
+          u2 = t & BigInt1.mask
           dig(j) = qhat.toInt // Store quotient digit. If we subtracted too much, add back.
           if (t < 0) {
             dig(j) -= 1 //Unfolded loop.
             t = u0 + dl
-            u0 = t & BigInt.mask
+            u0 = t & BigInt1.mask
             t >>>= 32
             t = u1 + dh + t
-            u1 = t & BigInt.mask
+            u1 = t & BigInt1.mask
             t >>>= 32
-            u2 += t & BigInt.mask
+            u2 += t & BigInt1.mask
           }
           {
-            j -= 1; j + 1
+            j -= 1;
+            j + 1
           }
         }
         len -= 1
         dig(len) = 0
         if (len > 1 && dig(len - 1) == 0) {
-          len -= 1; len
+          len -= 1;
+          len
         }
         val tmp = u1 << 32 - s | u0 >>> s
         return if (s == 0) tmp
@@ -1422,7 +1474,7 @@ class BigInt extends Number with Comparable[BigInt] {
         val rem = udiv(mod) //todo: opt?
         len = 2
         dig(0) = rem.toInt
-        if (rem == (rem & BigInt.mask)) {
+        if (rem == (rem & BigInt1.mask)) {
           len -= 1
           return
           //if(dig[0]==0) sign = 1;}
@@ -1551,11 +1603,11 @@ class BigInt extends Number with Comparable[BigInt] {
           while ( {
             i < ulen
           }) {
-            carry = (u(i) & BigInt.mask) + (v(i) & BigInt.mask) + carry
+            carry = (u(i) & BigInt1.mask) + (v(i) & BigInt1.mask) + carry
             dig(i) = carry.toInt
-            carry >>>= 32
-            {
-              i += 1; i - 1
+            carry >>>= 32 {
+              i += 1;
+              i - 1
             }
           }
           if (vlen > len) {
@@ -1565,15 +1617,18 @@ class BigInt extends Number with Comparable[BigInt] {
           if (carry != 0) { //carry==1
             while ( {
               i < len && {
-                dig(i) += 1; dig(i)
+                dig(i) += 1;
+                dig(i)
               } == 0
             }) {
-              i += 1; i - 1
+              i += 1;
+              i - 1
             }
             if (i == len) { //vlen==len
               if (len == dig.length) realloc()
               dig({
-                len += 1; len - 1
+                len += 1;
+                len - 1
               }) = 1
             }
           }
@@ -1599,11 +1654,11 @@ class BigInt extends Number with Comparable[BigInt] {
           while ( {
             i < ulen
           }) {
-            dif = (v(i) & BigInt.mask) - (u(i) & BigInt.mask) + dif
+            dif = (v(i) & BigInt1.mask) - (u(i) & BigInt1.mask) + dif
             dig(i) = dif.toInt
-            dif >>= 32
-            {
-              i += 1; i - 1
+            dif >>= 32 {
+              i += 1;
+              i - 1
             }
           }
           if (dif != 0) {
@@ -1611,20 +1666,24 @@ class BigInt extends Number with Comparable[BigInt] {
               dig(i) == 0
             }) {
               {
-                dig(i) -= 1; dig(i)
+                dig(i) -= 1;
+                dig(i)
               }
               {
-                i += 1; i - 1
+                i += 1;
+                i - 1
               }
             }
             if ( {
-              dig(i) -= 1; dig(i)
+              dig(i) -= 1;
+              dig(i)
             } == 0 && i + 1 == len) len = ulen
           }
           while ( {
             len > 1 && dig(len - 1) == 0
           }) {
-            len -= 1; len
+            len -= 1;
+            len
           }
         }
 
@@ -1634,7 +1693,7 @@ class BigInt extends Number with Comparable[BigInt] {
           * @param a The number to add.
           * @complexity O(n)
           */
-        def add(a: BigInt) = {
+        def add(a: BigInt1) = {
           if (sign == a.sign) {
             addMag(a.dig, a.len)
             return
@@ -1653,11 +1712,11 @@ class BigInt extends Number with Comparable[BigInt] {
           while ( {
             i < len
           }) {
-            dif = (v(i) & BigInt.mask) - (dig(i) & BigInt.mask) + dif
+            dif = (v(i) & BigInt1.mask) - (dig(i) & BigInt1.mask) + dif
             dig(i) = dif.toInt
-            dif >>= 32
-            {
-              i += 1; i - 1
+            dif >>= 32 {
+              i += 1;
+              i - 1
             }
           }
           if (vlen > len) {
@@ -1669,16 +1728,20 @@ class BigInt extends Number with Comparable[BigInt] {
               i < vlen && dig(i) == 0
             }) {
               {
-                dig(i) -= 1; dig(i)
+                dig(i) -= 1;
+                dig(i)
               }
               {
-                i += 1; i - 1
+                i += 1;
+                i - 1
               }
             }
             if ( {
-              dig(i) -= 1; dig(i)
+              dig(i) -= 1;
+              dig(i)
             } == 0 && i + 1 == len) {
-              len -= 1; len
+              len -= 1;
+              len
             }
           }
           //if(i==vlen) should be impossible
@@ -1690,7 +1753,7 @@ class BigInt extends Number with Comparable[BigInt] {
           * @param a The number to subtract.
           * @complexity O(n)
           */
-        def sub(a: BigInt) = {
+        def sub(a: BigInt1) = {
           if (sign != a.sign) {
             addMag(a.dig, a.len)
             return
@@ -1708,11 +1771,11 @@ class BigInt extends Number with Comparable[BigInt] {
           while ( {
             i < len
           }) {
-            dif = (v(i) & BigInt.mask) - (dig(i) & BigInt.mask) + dif
+            dif = (v(i) & BigInt1.mask) - (dig(i) & BigInt1.mask) + dif
             dig(i) = dif.toInt
-            dif >>= 32
-            {
-              i += 1; i - 1
+            dif >>= 32 {
+              i += 1;
+              i - 1
             }
           }
           if (vlen > len) {
@@ -1724,16 +1787,20 @@ class BigInt extends Number with Comparable[BigInt] {
               i < vlen && dig(i) == 0
             }) {
               {
-                dig(i) -= 1; dig(i)
+                dig(i) -= 1;
+                dig(i)
               }
               {
-                i += 1; i - 1
+                i += 1;
+                i - 1
               }
             }
             if ( {
-              dig(i) -= 1; dig(i)
+              dig(i) -= 1;
+              dig(i)
             } == 0 && i + 1 == len) {
-              len -= 1; len
+              len -= 1;
+              len
             }
           }
         } //Fix naming.
@@ -1744,7 +1811,7 @@ class BigInt extends Number with Comparable[BigInt] {
           * @param mul The number to multiply with.
           * @complexity O(n^2) - O(n log n)
           **/
-        def mul(mul: BigInt) = if (isZero)
+        def mul(mul: BigInt1) = if (isZero)
         else if (mul.isZero) setToZero()
         else if (mul.len <= 2 || len <= 2) {
           sign *= mul.sign
@@ -1754,9 +1821,9 @@ class BigInt extends Number with Comparable[BigInt] {
             assign(mul.dig, mul.len)
             umul(tmp)
           }
-          else if (mul.len == 2) umul(mul.dig(1).toLong << 32 | (mul.dig(0) & BigInt.mask))
+          else if (mul.len == 2) umul(mul.dig(1).toLong << 32 | (mul.dig(0) & BigInt1.mask))
           else {
-            val tmp = dig(1).toLong << 32 | (dig(0) & BigInt.mask)
+            val tmp = dig(1).toLong << 32 | (dig(0) & BigInt1.mask)
             assign(mul.dig, mul.len)
             umul(tmp)
           }
@@ -1772,7 +1839,7 @@ class BigInt extends Number with Comparable[BigInt] {
           * @param mul The number to multiply with.
           * @complexity O(n^2)
           **/
-        def smallMul(mul: BigInt) = {
+        def smallMul(mul: BigInt1) = {
           if (isZero) return
           if (mul.isZero) {
             setToZero()
@@ -1789,11 +1856,12 @@ class BigInt extends Number with Comparable[BigInt] {
             ulen = vlen
             vlen = len
           }
-          val res = BigInt.naiveMul(u, ulen, v, vlen) //Todo remove function overhead.
+          val res = BigInt1.naiveMul(u, ulen, v, vlen) //Todo remove function overhead.
           dig = res
           len = res.length
           if (res(len - 1) == 0) {
-            len -= 1; len
+            len -= 1;
+            len
           }
         }
 
@@ -1803,7 +1871,7 @@ class BigInt extends Number with Comparable[BigInt] {
           * @param mul The number to multiply with.
           * @complexity O(n^1.585)
           **/
-        def karatsuba(mul: BigInt) = karatsuba(mul, false) //Fix naming?
+        def karatsuba(mul: BigInt1) = karatsuba(mul, false) //Fix naming?
         /**
           * Multiplies this number by the given BigInt using the Karatsuba algorithm.
           * The caller can choose to use a parallel version which is more suitable for larger numbers.
@@ -1812,7 +1880,7 @@ class BigInt extends Number with Comparable[BigInt] {
           * @param parallel true if we should try to parallelize the algorithm, false if we shouldn't.
           * @complexity O(n^1.585)
           **/
-        def karatsuba(mul: BigInt, parallel: Boolean) = {
+        def karatsuba(mul: BigInt1, parallel: Boolean) = {
           if (mul.dig.length < len) mul.realloc(len)
           else if (dig.length < mul.len) realloc(mul.len)
           if (mul.len < len) {
@@ -1820,7 +1888,8 @@ class BigInt extends Number with Comparable[BigInt] {
             while ( {
               i < len
             }) mul.dig(i) = 0 {
-              i += 1; i - 1
+              i += 1;
+              i - 1
             }
           }
           if (len < mul.len) {
@@ -1828,15 +1897,16 @@ class BigInt extends Number with Comparable[BigInt] {
             while ( {
               i < mul.len
             }) dig(i) = 0 {
-              i += 1; i - 1
+              i += 1;
+              i - 1
             }
           }
           val mlen = Math.max(len, mul.len)
           var res = null
-          if (!parallel) res = BigInt.kmul(dig, mul.dig, 0, mlen)
+          if (!parallel) res = BigInt1.kmul(dig, mul.dig, 0, mlen)
           else {
             val pool = Executors.newFixedThreadPool(12)
-            try res = BigInt.pmul(dig, mul.dig, 0, mlen, 1, pool)
+            try res = BigInt1.pmul(dig, mul.dig, 0, mlen, 1, pool)
             catch {
               case e: Exception =>
                 System.err.println(e)
@@ -1847,7 +1917,8 @@ class BigInt extends Number with Comparable[BigInt] {
           while ( {
             res(len - 1) == 0
           }) {
-            len -= 1; len
+            len -= 1;
+            len
           }
           dig = res
           sign *= mul.sign
@@ -1859,7 +1930,7 @@ class BigInt extends Number with Comparable[BigInt] {
           * @param div The number to divide with.
           * @complexity O(n^2)
           **/
-        def div(div: BigInt) = {
+        def div(div: BigInt1) = {
           if (div.len == 1) {
             sign *= div.sign
             udiv(div.dig(0))
@@ -1882,7 +1953,8 @@ class BigInt extends Number with Comparable[BigInt] {
           while ( {
             len > 1 && dig(len - 1) == 0
           }) {
-            len -= 1; len
+            len -= 1;
+            len
           }
           sign *= div.sign
         }
@@ -1893,7 +1965,7 @@ class BigInt extends Number with Comparable[BigInt] {
           * @param div The number to use in the division causing the remainder.
           * @complexity O(n^2)
           **/
-        def rem(div: BigInt) = { // -7/-3 = 2, 2*-3 + -1
+        def rem(div: BigInt1) = { // -7/-3 = 2, 2*-3 + -1
           // -7/3 = -2, -2*3 + -1
           // 7/-3 = -2, -2*-3 + 1
           // 7/3 = 2, 2*3 + 1
@@ -1914,7 +1986,8 @@ class BigInt extends Number with Comparable[BigInt] {
           while ( {
             dig(len - 1) == 0
           }) {
-            len -= 1; len
+            len -= 1;
+            len
           }
         }
 
@@ -1926,22 +1999,22 @@ class BigInt extends Number with Comparable[BigInt] {
           * @return The remainder.
           * @complexity O(n^2)
           **/
-        def divRem(div: BigInt) = {
+        def divRem(div: BigInt1) = {
           var tmp = sign
           if (div.len == 1) {
             sign *= div.sign
-            return new BigInt(tmp, udiv(div.dig(0)))
+            return new BigInt1(tmp, udiv(div.dig(0)))
           }
           tmp = compareAbsTo(div)
           if (tmp < 0) {
-            val cpy = new BigInt(sign, dig, len)
+            val cpy = new BigInt1(sign, dig, len)
             dig = new Array[Int](2)
             len = 1 //setToZero()
             return cpy
           }
           if (tmp == 0) {
             uassign(1, sign *= div.sign)
-            return new BigInt(1, 0)
+            return new BigInt1(1, 0)
           }
           val q = new Array[Int](len - div.len + 1)
           if (len == dig.length) realloc(len + 1)
@@ -1952,16 +2025,18 @@ class BigInt extends Number with Comparable[BigInt] {
           while ( {
             len > 1 && dig(len - 1) == 0
           }) {
-            len -= 1; len
+            len -= 1;
+            len
           }
           tmp = div.len
           while ( {
             tmp > 1 && r(tmp - 1) == 0
           }) {
-            tmp -= 1; tmp
+            tmp -= 1;
+            tmp
           }
           sign *= div.sign
-          new BigInt(sign / div.sign, r, tmp)
+          new BigInt1(sign / div.sign, r, tmp)
         }
 
         /**
@@ -2003,7 +2078,8 @@ class BigInt extends Number with Comparable[BigInt] {
             while ( {
               i > 0
             }) v(i) = (v(i) << s) | (v(i - 1) >>> 32 - s) {
-              i -= 1; i + 1
+              i -= 1;
+              i + 1
             }
             v(0) = v(0) << s
             u(m) = u(m - 1) >>> 32 - s
@@ -2011,27 +2087,29 @@ class BigInt extends Number with Comparable[BigInt] {
             while ( {
               i > 0
             }) u(i) = (u(i) << s) | (u(i - 1) >>> 32 - s) {
-              i -= 1; i + 1
+              i -= 1;
+              i + 1
             }
             u(0) = u(0) << s
           }
-          val dh = v(n - 1) & BigInt.mask
-          val dl = v(n - 2) & BigInt.mask
+          val dh = v(n - 1) & BigInt1.mask
+          val dl = v(n - 2) & BigInt1.mask
           val hbit = Long.MIN_VALUE
           j = m - n
           while ( {
             j >= 0
           }) { //Main loop
             // Compute estimate qhat of q[j].
-            k = u(j + n) * b + (u(j + n - 1) & BigInt.mask) //Unsigned division is a pain in the ass! ='(
+            k = u(j + n) * b + (u(j + n - 1) & BigInt1.mask) //Unsigned division is a pain in the ass! ='(
             qhat = (k >>> 1) / dh << 1
             t = k - qhat * dh
             if (t + hbit >= dh + hbit) {
-              qhat += 1; qhat - 1
+              qhat += 1;
+              qhat - 1
             }
             rhat = k - qhat * dh
             while ( {
-              qhat + hbit >= b + hbit || qhat * dl + hbit > b * rhat + (u(j + n - 2) & BigInt.mask) + hbit
+              qhat + hbit >= b + hbit || qhat * dl + hbit > b * rhat + (u(j + n - 2) & BigInt1.mask) + hbit
             }) {
               qhat = qhat - 1
               rhat = rhat + dh
@@ -2042,15 +2120,15 @@ class BigInt extends Number with Comparable[BigInt] {
               while ( {
                 i < n
               }) {
-                p = qhat * (v(i) & BigInt.mask)
-                t = (u(i + j) & BigInt.mask) - k - (p & BigInt.mask)
+                p = qhat * (v(i) & BigInt1.mask)
+                t = (u(i + j) & BigInt1.mask) - k - (p & BigInt1.mask)
                 u(i + j) = t.toInt
-                k = (p >>> 32) - (t >> 32)
-                {
-                  i += 1; i - 1
+                k = (p >>> 32) - (t >> 32) {
+                  i += 1;
+                  i - 1
                 }
               }
-              t = (u(j + n) & BigInt.mask) - k
+              t = (u(j + n) & BigInt1.mask) - k
               u(j + n) = t.toInt
               q(j) = qhat.toInt
               if (t < 0) {
@@ -2060,17 +2138,19 @@ class BigInt extends Number with Comparable[BigInt] {
                 while ( {
                   i < n
                 }) {
-                  t = (u(i + j) & BigInt.mask) + (v(i) & BigInt.mask) + k
+                  t = (u(i + j) & BigInt1.mask) + (v(i) & BigInt1.mask) + k
                   u(i + j) = t.toInt
                   k = t >>> 32 //>>
                   {
-                    i += 1; i - 1
+                    i += 1;
+                    i - 1
                   }
                 }
                 u(j + n) += k.toInt
               }
               {
-                j -= 1; j + 1
+                j -= 1;
+                j + 1
               }
             }
             if (s > 0) { //Unnormalize v[].
@@ -2078,7 +2158,8 @@ class BigInt extends Number with Comparable[BigInt] {
               while ( {
                 i < n - 1
               }) v(i) = v(i) >>> s | v(i + 1) << 32 - s {
-                i += 1; i - 1
+                i += 1;
+                i - 1
               }
               v(n - 1) >>>= s
               //Unnormalize u[].
@@ -2086,7 +2167,8 @@ class BigInt extends Number with Comparable[BigInt] {
               while ( {
                 i < m
               }) u(i) = u(i) >>> s | u(i + 1) << 32 - s {
-                i += 1; i - 1
+                i += 1;
+                i - 1
               }
               u(m) >>>= s
             }
@@ -2116,7 +2198,8 @@ class BigInt extends Number with Comparable[BigInt] {
                 tmp > 0
               }) {
                 buf({
-                  top -= 1; top
+                  top -= 1;
+                  top
                 }) += tmp % 10 //TODO: Optimize.
                 tmp /= 10
               }
@@ -2128,7 +2211,8 @@ class BigInt extends Number with Comparable[BigInt] {
                 }
               }
               if (sign < 0) buf({
-                top -= 1; top
+                top -= 1;
+                top
               }) = '-'
               System.arraycopy(cpy, 0, dig, 0, len = cpy.length)
               return new String(buf, top, buf.length - top)
@@ -2148,16 +2232,16 @@ class BigInt extends Number with Comparable[BigInt] {
               while ( {
                 i > 0
               }) {
-                rem = (rem << 32) + (dig(i) & BigInt.mask)
+                rem = (rem << 32) + (dig(i) & BigInt1.mask)
                 val q = (rem / pow5).toInt
                 rem = rem % pow5
                 dig(i) = nextq | q >>> 13
-                nextq = q << 32 - 13
-                {
-                  i -= 1; i + 1
+                nextq = q << 32 - 13 {
+                  i -= 1;
+                  i + 1
                 }
               }
-              rem = (rem << 32) + (dig(0) & BigInt.mask)
+              rem = (rem << 32) + (dig(0) & BigInt1.mask)
               val mod2 = dig(0) & pow2 - 1
               dig(0) = nextq | (rem / pow5 >>> 13).toInt
               rem = rem % pow5
@@ -2167,9 +2251,11 @@ class BigInt extends Number with Comparable[BigInt] {
               rem = (rem - pow5 * (mod2 - rem) % pow10 * 67) % pow10
               if (rem < 0) rem += pow10
               if (dig(len - 1) == 0 && len > 1) if (dig({
-                len -= 1; len
+                len -= 1;
+                len
               } - 1) == 0 && len > 1) {
-                len -= 1; len
+                len -= 1;
+                len
               }
               return rem
             }
@@ -2189,7 +2275,8 @@ class BigInt extends Number with Comparable[BigInt] {
               var res = dig
               if ((dig(len - 1) << shift >>> shift) != dig(len - 1)) { //Overflow?
                 if ( {
-                  len += 1; len
+                  len += 1;
+                  len
                 } > dig.length) res = new Array[Int](len + 1) //realloc(len+1);
                 else dig(len - 1) = 0
               }
@@ -2199,7 +2286,8 @@ class BigInt extends Number with Comparable[BigInt] {
               while ( {
                 i > first
               }) res(i) = nxt << shift | (nxt = dig(i - 1)) >>> 32 - shift {
-                i -= 1; i + 1
+                i -= 1;
+                i + 1
               }
               res(first) = nxt << shift
               dig = res
@@ -2220,10 +2308,12 @@ class BigInt extends Number with Comparable[BigInt] {
               while ( {
                 i < len - 1
               }) dig(i) = nxt >>> shift | (nxt = dig(i + 1)) << 32 - shift {
-                i += 1; i - 1
+                i += 1;
+                i - 1
               }
               if ((dig(len - 1) >>>= shift) == 0 && len > 1) {
-                len -= 1; len
+                len -= 1;
+                len
               }
             }
 
@@ -2248,7 +2338,8 @@ class BigInt extends Number with Comparable[BigInt] {
                 while ( {
                   i < shift
                 }) dig(i) = 0 {
-                  i += 1; i - 1
+                  i += 1;
+                  i - 1
                 }
               }
               len += shift
@@ -2311,7 +2402,8 @@ class BigInt extends Number with Comparable[BigInt] {
               while ( {
                 j <= bigBit && dig(j) == 0
               }) {
-                j += 1; j
+                j += 1;
+                j
               }
               if (j > bigBit) return false
               if (j < bigBit) return (dig(bigBit) & 1 << smallBit) == 0
@@ -2337,7 +2429,8 @@ class BigInt extends Number with Comparable[BigInt] {
                   while ( {
                     len <= bigBit
                   }) dig(len) = 0 {
-                    len += 1; len - 1
+                    len += 1;
+                    len - 1
                   }
                   // len = bigBit+1;
                 }
@@ -2349,18 +2442,21 @@ class BigInt extends Number with Comparable[BigInt] {
                 while ( {
                   j <= bigBit && dig(j) == 0
                 }) {
-                  j += 1; j
+                  j += 1;
+                  j
                 }
                 if (j > bigBit) {
                   dig(bigBit) = -1 << smallBit
                   while ( {
                     dig(j) == 0
                   }) dig(j) = -1 {
-                    j += 1; j - 1
+                    j += 1;
+                    j - 1
                   }
                   dig(j) = ~(-dig(j))
                   if (j == len - 1 && dig(len - 1) == 0) {
-                    len -= 1; len
+                    len -= 1;
+                    len
                   }
                   return
                 }
@@ -2369,7 +2465,8 @@ class BigInt extends Number with Comparable[BigInt] {
                   while ( {
                     dig(len - 1) == 0
                   }) {
-                    len -= 1; len
+                    len -= 1;
+                    len
                   }
                   return
                 }
@@ -2397,7 +2494,8 @@ class BigInt extends Number with Comparable[BigInt] {
                 while ( {
                   dig(len - 1) == 0 && len > 1
                 }) {
-                  len -= 1; len
+                  len -= 1;
+                  len
                 }
               }
               else {
@@ -2411,7 +2509,8 @@ class BigInt extends Number with Comparable[BigInt] {
                   while ( {
                     len <= bigBit
                   }) dig(len) = 0 {
-                    len += 1; len - 1
+                    len += 1;
+                    len - 1
                   }
                   dig(bigBit) |= 1 << smallBit
                   return
@@ -2420,7 +2519,8 @@ class BigInt extends Number with Comparable[BigInt] {
                 while ( {
                   j <= bigBit && dig(j) == 0
                 }) {
-                  j += 1; j
+                  j += 1;
+                  j
                 }
                 if (j > bigBit) return
                 if (j < bigBit) {
@@ -2441,12 +2541,14 @@ class BigInt extends Number with Comparable[BigInt] {
                   while ( {
                     j < len && dig(j) == -1
                   }) dig(j) = 0 {
-                    j += 1; j - 1
+                    j += 1;
+                    j - 1
                   }
                   if (j == dig.length) realloc(j + 2)
                   if (j == len) {
                     dig({
-                      len += 1; len - 1
+                      len += 1;
+                      len - 1
                     }) = 1
                     return
                   }
@@ -2478,7 +2580,8 @@ class BigInt extends Number with Comparable[BigInt] {
                 while ( {
                   len <= bigBit
                 }) dig(len) = 0 {
-                  len += 1; len - 1
+                  len += 1;
+                  len - 1
                 }
                 dig(bigBit) ^= 1 << smallBit
               }
@@ -2488,7 +2591,8 @@ class BigInt extends Number with Comparable[BigInt] {
                 while ( {
                   j <= bigBit && dig(j) == 0
                 }) {
-                  j += 1; j
+                  j += 1;
+                  j
                 }
                 if (j < bigBit) {
                   dig(bigBit) ^= 1 << smallBit
@@ -2499,11 +2603,13 @@ class BigInt extends Number with Comparable[BigInt] {
                   while ( {
                     dig(j) == 0
                   }) dig(j) = -1 {
-                    j += 1; j - 1
+                    j += 1;
+                    j - 1
                   }
                   dig(j) = ~(-dig(j))
                   if (j == len - 1 && dig(len - 1) == 0) {
-                    len -= 1; len
+                    len -= 1;
+                    len
                   }
                   return
                 }
@@ -2524,12 +2630,14 @@ class BigInt extends Number with Comparable[BigInt] {
                   while ( {
                     j < len && dig(j) == -1
                   }) dig(j) = 0 {
-                    j += 1; j - 1
+                    j += 1;
+                    j - 1
                   }
                   if (j == dig.length) realloc(j + 2)
                   if (j == len) {
                     dig({
-                      len += 1; len - 1
+                      len += 1;
+                      len - 1
                     }) = 1
                     return
                   }
@@ -2543,7 +2651,8 @@ class BigInt extends Number with Comparable[BigInt] {
               while ( {
                 dig(len - 1) == 0 && len > 1
               }) {
-                len -= 1; len
+                len -= 1;
+                len
               }
             }
 
@@ -2553,14 +2662,15 @@ class BigInt extends Number with Comparable[BigInt] {
               * @param mask The number to bitwise-and with.
               * @complexity O(n)
               */
-            def and(mask: BigInt) = if (sign > 0) {
+            def and(mask: BigInt1) = if (sign > 0) {
               if (mask.sign > 0) {
                 if (mask.len < len) len = mask.len
                 var i = 0
                 while ( {
                   i < len
                 }) dig(i) &= mask.dig(i) {
-                  i += 1; i - 1
+                  i += 1;
+                  i - 1
                 }
               }
               else {
@@ -2573,7 +2683,8 @@ class BigInt extends Number with Comparable[BigInt] {
                 }) {
                   a = dig(j)
                   b = mask.dig(j) {
-                    j += 1; j - 1
+                    j += 1;
+                    j - 1
                   }
                 }
                 if (a != 0 && b == 0) {
@@ -2581,7 +2692,8 @@ class BigInt extends Number with Comparable[BigInt] {
                   while ( {
                     j < mlen && mask.dig(j) == 0
                   }) dig(j) = 0 {
-                    j += 1; j - 1
+                    j += 1;
+                    j - 1
                   }
                   if (j < mlen) dig(j) &= -mask.dig(j)
                   else if (j == len) len = 1
@@ -2591,20 +2703,23 @@ class BigInt extends Number with Comparable[BigInt] {
                   while ( {
                     j < mlen && dig(j) == 0
                   }) {
-                    j += 1; j - 1
+                    j += 1;
+                    j - 1
                   }
                 }
                 else dig(j - 1) &= -b
                 while ( {
                   j < mlen
                 }) dig(j) &= ~mask.dig(j) {
-                  j += 1; j - 1
+                  j += 1;
+                  j - 1
                 }
               }
               while ( {
                 dig(len - 1) == 0 && len > 1
               }) {
-                len -= 1; len
+                len -= 1;
+                len
               }
             }
             else {
@@ -2618,7 +2733,8 @@ class BigInt extends Number with Comparable[BigInt] {
                 }) {
                   a = dig(j)
                   b = mask.dig(j) {
-                    j += 1; j - 1
+                    j += 1;
+                    j - 1
                   }
                 }
                 if (a != 0 && b == 0) {
@@ -2626,14 +2742,16 @@ class BigInt extends Number with Comparable[BigInt] {
                   while ( {
                     j < mlen && mask.dig(j) == 0
                   }) dig(j) = 0 {
-                    j += 1; j - 1
+                    j += 1;
+                    j - 1
                   }
                 }
                 else if (a == 0) {
                   while ( {
                     j < mlen && dig(j) == 0
                   }) {
-                    j += 1; j - 1
+                    j += 1;
+                    j - 1
                   }
                   if (j < mlen) dig(j) = -dig(j) & mask.dig(j)
                   j += 1
@@ -2642,7 +2760,8 @@ class BigInt extends Number with Comparable[BigInt] {
                 while ( {
                   j < mlen
                 }) dig(j) = ~dig(j) & mask.dig(j) {
-                  j += 1; j - 1
+                  j += 1;
+                  j - 1
                 }
                 if (mask.len > len) {
                   if (mask.len > dig.length) realloc(mask.len + 2)
@@ -2653,7 +2772,8 @@ class BigInt extends Number with Comparable[BigInt] {
                 while ( {
                   dig(len - 1) == 0 && len > 1
                 }) {
-                  len -= 1; len
+                  len -= 1;
+                  len
                 }
               }
               else {
@@ -2669,7 +2789,8 @@ class BigInt extends Number with Comparable[BigInt] {
                 }) {
                   a = dig(j)
                   b = mask.dig(j) {
-                    j += 1; j - 1
+                    j += 1;
+                    j - 1
                   }
                 }
                 if (a != 0 && b == 0) {
@@ -2677,7 +2798,8 @@ class BigInt extends Number with Comparable[BigInt] {
                   while ( {
                     j < mlen && mask.dig(j) == 0
                   }) dig(j) = 0 {
-                    j += 1; j - 1
+                    j += 1;
+                    j - 1
                   }
                   if (j < mlen) dig(j) = -(~(dig(j)) & -(mask.dig(j)))
                   j += 1
@@ -2686,7 +2808,8 @@ class BigInt extends Number with Comparable[BigInt] {
                   while ( {
                     j < mlen && dig(j) == 0
                   }) {
-                    j += 1; j - 1
+                    j += 1;
+                    j - 1
                   }
                   if (j < mlen) dig(j) = -(-(dig(j)) & ~(mask.dig(j)))
                   j += 1
@@ -2697,7 +2820,8 @@ class BigInt extends Number with Comparable[BigInt] {
                     dig(j) = -(~(dig(j) | mask.dig(j)))
                     while ( {
                       {
-                        j += 1; j
+                        j += 1;
+                        j
                       } < mlen && dig(j - 1) == 0
                     }) dig(j) = -(~(dig(j) | mask.dig(j))) // -(~dig[j]&~mask.dig[j])}
                     if (j == mlen && dig(j - 1) == 0) {
@@ -2705,7 +2829,8 @@ class BigInt extends Number with Comparable[BigInt] {
                       while ( {
                         j < blen && dig(j) == -1
                       }) dig({
-                        j += 1; j - 1
+                        j += 1;
+                        j - 1
                       }) = 0 // mask.dig[j]==dig[j]
                       if (j < blen) dig(j) = -(~dig(j))
                       else {
@@ -2722,7 +2847,8 @@ class BigInt extends Number with Comparable[BigInt] {
                   }) {
                     dig(j) |= mask.dig(j) // ~(~dig[j]&~mask.dig[j]);
                     {
-                      j += 1; j - 1
+                      j += 1;
+                      j - 1
                     }
                   }
                   if (mask.len > len) len = mask.len
@@ -2735,14 +2861,15 @@ class BigInt extends Number with Comparable[BigInt] {
                 * @param mask The number to bitwise-or with.
                 * @complexity O(n)
                 */
-              def or(mask: BigInt) = if (sign > 0) if (mask.sign > 0) if (mask.len > len) {
+              def or(mask: BigInt1) = if (sign > 0) if (mask.sign > 0) if (mask.len > len) {
                 if (mask.len > dig.length) realloc(mask.len + 1)
                 System.arraycopy(mask.dig, len, dig, len, mask.len - len)
                 var i = 0
                 while ( {
                   i < len
                 }) dig(i) |= mask.dig(i) {
-                  i += 1; i - 1
+                  i += 1;
+                  i - 1
                 }
                 len = mask.len
               }
@@ -2751,7 +2878,8 @@ class BigInt extends Number with Comparable[BigInt] {
                 while ( {
                   i < mask.len
                 }) dig(i) |= mask.dig(i) {
-                  i += 1; i - 1
+                  i += 1;
+                  i - 1
                 }
               }
               else {
@@ -2766,7 +2894,8 @@ class BigInt extends Number with Comparable[BigInt] {
                 }) {
                   a = dig(j)
                   b = mask.dig(j) {
-                    j += 1; j - 1
+                    j += 1;
+                    j - 1
                   }
                 }
                 if (a != 0 && b == 0) {
@@ -2774,7 +2903,8 @@ class BigInt extends Number with Comparable[BigInt] {
                   while ( {
                     mask.dig(j) == 0
                   }) dig(j) ^= -1 {
-                    j += 1; j - 1
+                    j += 1;
+                    j - 1
                   }
                   if (j < mLen) dig(j) = ~(dig(j) | -(mask.dig(j)))
                   else { // mask.dig[j] == dig[j]
@@ -2787,7 +2917,8 @@ class BigInt extends Number with Comparable[BigInt] {
                   while ( {
                     j < mLen && dig(j) == 0
                   }) dig(j) = mask.dig(j) {
-                    j += 1; j - 1
+                    j += 1;
+                    j - 1
                   }
                 }
                 else { // a!=0 && b!=0
@@ -2798,7 +2929,8 @@ class BigInt extends Number with Comparable[BigInt] {
                 }) {
                   dig(j) = ~dig(j) & mask.dig(j) // ~(dig[j]|~mask.dig[j])
                   {
-                    j += 1; j - 1
+                    j += 1;
+                    j - 1
                   }
                 }
                 sign = -1
@@ -2806,7 +2938,8 @@ class BigInt extends Number with Comparable[BigInt] {
                 while ( {
                   dig(len - 1) == 0
                 }) {
-                  len -= 1; len
+                  len -= 1;
+                  len
                 }
               }
               else {
@@ -2819,28 +2952,32 @@ class BigInt extends Number with Comparable[BigInt] {
                 }) {
                   a = dig(j)
                   b = mask.dig(j) {
-                    j += 1; j - 1
+                    j += 1;
+                    j - 1
                   }
                 }
                 if (mask.sign > 0) {
                   if (a != 0 && b == 0) while ( {
                     j < mLen && mask.dig(j) == 0
                   }) {
-                    j += 1; j - 1
+                    j += 1;
+                    j - 1
                   }
                   else if (a == 0) {
                     dig(j - 1) = -b
                     while ( {
                       j < mLen && dig(j) == 0
                     }) dig(j) = ~mask.dig(j) {
-                      j += 1; j - 1
+                      j += 1;
+                      j - 1
                     }
                     if (j < mLen) dig(j) = ~(-(dig(j)) | mask.dig(j))
                     else {
                       while ( {
                         dig(j) == 0
                       }) dig(j) = -1 {
-                        j += 1; j - 1
+                        j += 1;
+                        j - 1
                       }
                       dig(j) = ~(-dig(j))
                     }
@@ -2852,7 +2989,8 @@ class BigInt extends Number with Comparable[BigInt] {
                   }) {
                     dig(j) &= ~mask.dig(j) // ~(~dig[j]|mask.dig[j])
                     {
-                      j += 1; j - 1
+                      j += 1;
+                      j - 1
                     }
                   }
                 }
@@ -2861,7 +2999,8 @@ class BigInt extends Number with Comparable[BigInt] {
                     while ( {
                       j < mLen && mask.dig(j) == 0
                     }) {
-                      j += 1; j - 1
+                      j += 1;
+                      j - 1
                     }
                     if (j < mLen) dig(j) = ~(~(dig(j)) | -(mask.dig(j)))
                     j += 1
@@ -2871,7 +3010,8 @@ class BigInt extends Number with Comparable[BigInt] {
                     while ( {
                       j < mLen && dig(j) == 0
                     }) dig(j) = mask.dig(j) {
-                      j += 1; j - 1
+                      j += 1;
+                      j - 1
                     }
                     if (j < mLen) dig(j) = ~(-(dig(j)) | ~(mask.dig(j)))
                     j += 1
@@ -2882,7 +3022,8 @@ class BigInt extends Number with Comparable[BigInt] {
                   }) {
                     dig(j) &= mask.dig(j) // ~(~dig[j]|~mask.dig[j])
                     {
-                      j += 1; j - 1
+                      j += 1;
+                      j - 1
                     }
                   }
                   len = mLen
@@ -2890,7 +3031,8 @@ class BigInt extends Number with Comparable[BigInt] {
                 while ( {
                   dig(len - 1) == 0
                 }) {
-                  len -= 1; len
+                  len -= 1;
+                  len
                 }
               }
 
@@ -2901,7 +3043,7 @@ class BigInt extends Number with Comparable[BigInt] {
                 * @param mask The number to bitwise-xor with.
                 * @complexity O(n)
                 */
-              def xor(mask: BigInt) = if (sign > 0) {
+              def xor(mask: BigInt1) = if (sign > 0) {
                 if (mask.len > len) {
                   if (mask.len > dig.length) realloc(mask.len + 2)
                   System.arraycopy(mask.dig, len, dig, len, mask.len - len)
@@ -2912,7 +3054,8 @@ class BigInt extends Number with Comparable[BigInt] {
                   while ( {
                     i < mlen
                   }) dig(i) ^= mask.dig(i) {
-                    i += 1; i - 1
+                    i += 1;
+                    i - 1
                   }
                 }
                 else {
@@ -2924,7 +3067,8 @@ class BigInt extends Number with Comparable[BigInt] {
                   }) {
                     a = dig(j)
                     b = mask.dig(j) {
-                      j += 1; j - 1
+                      j += 1;
+                      j - 1
                     }
                   }
                   if (a != 0 && b == 0) {
@@ -2932,7 +3076,8 @@ class BigInt extends Number with Comparable[BigInt] {
                     while ( {
                       mask.dig(j) == 0
                     }) dig(j) ^= -1 {
-                      j += 1; j
+                      j += 1;
+                      j
                     }
                     if (j < len) dig(j) = ~(dig(j) ^ -(mask.dig(j)))
                     else dig(j) = ~(-mask.dig(j))
@@ -2944,7 +3089,8 @@ class BigInt extends Number with Comparable[BigInt] {
                     while ( {
                       j < mlen && dig(j - 1) == 0
                     }) dig(j) = -(dig(j) ^ ~(mask.dig(j))) {
-                      j += 1; j - 1
+                      j += 1;
+                      j - 1
                     }
                     if (j >= mlen && dig(j - 1) == 0) {
                       val tmp = if (j < len) dig
@@ -2953,7 +3099,8 @@ class BigInt extends Number with Comparable[BigInt] {
                       while ( {
                         j < blen && tmp(j) == -1
                       }) dig(j) = 0 {
-                        j += 1; j - 1
+                        j += 1;
+                        j - 1
                       }
                       if (blen == dig.length) realloc(blen + 2) // len==blen
                       if (j == blen) {
@@ -2969,7 +3116,8 @@ class BigInt extends Number with Comparable[BigInt] {
                   }) {
                     dig(j) ^= mask.dig(j) // ~(dig[j]^~mask.dig[j]);
                     {
-                      j += 1; j - 1
+                      j += 1;
+                      j - 1
                     }
                   }
                   sign = -1
@@ -2978,7 +3126,8 @@ class BigInt extends Number with Comparable[BigInt] {
                 else while ( {
                   dig(len - 1) == 0 && len > 1
                 }) {
-                  len -= 1; len
+                  len -= 1;
+                  len
                 }
               }
               else {
@@ -2996,25 +3145,29 @@ class BigInt extends Number with Comparable[BigInt] {
                   }) {
                     a = dig(j)
                     b = mask.dig(j) {
-                      j += 1; j - 1
+                      j += 1;
+                      j - 1
                     }
                   }
                   if (a != 0 && b == 0) while ( {
                     j < mlen && mask.dig(j) == 0
                   }) {
-                    j += 1; j
+                    j += 1;
+                    j
                   }
                   else if (a == 0) {
                     dig(j - 1) = -b
                     while ( {
                       j < mlen && dig(j) == 0
                     }) dig(j) = ~mask.dig(j) {
-                      j += 1; j - 1
+                      j += 1;
+                      j - 1
                     }
                     while ( {
                       j < len && dig(j) == 0
                     }) dig({
-                      j += 1; j - 1
+                      j += 1;
+                      j - 1
                     }) = -1
                     if (j < mlen) dig(j) = ~(-(dig(j)) ^ mask.dig(j))
                     else dig(j) = ~(-dig(j))
@@ -3026,7 +3179,8 @@ class BigInt extends Number with Comparable[BigInt] {
                   }) {
                     dig(j) ^= mask.dig(j) // ~(~dig[j]^mask.dig[j]);
                     {
-                      j += 1; j - 1
+                      j += 1;
+                      j - 1
                     }
                   }
                 }
@@ -3039,7 +3193,8 @@ class BigInt extends Number with Comparable[BigInt] {
                   }) {
                     a = dig(j)
                     b = mask.dig(j) {
-                      j += 1; j - 1
+                      j += 1;
+                      j - 1
                     }
                   }
                   if (a != 0 && b == 0) {
@@ -3049,7 +3204,8 @@ class BigInt extends Number with Comparable[BigInt] {
                     }) {
                       dig(j) ^= -1 // ~dig[j]
                       {
-                        j += 1; j - 1
+                        j += 1;
+                        j - 1
                       }
                     }
                     if (j < len) dig(j) = ~dig(j) ^ -mask.dig(j)
@@ -3061,12 +3217,14 @@ class BigInt extends Number with Comparable[BigInt] {
                     while ( {
                       j < mask.len && dig(j) == 0
                     }) dig(j) = ~mask.dig(j) {
-                      j += 1; j - 1
+                      j += 1;
+                      j - 1
                     }
                     while ( {
                       dig(j) == 0
                     }) dig({
-                      j += 1; j - 1
+                      j += 1;
+                      j - 1
                     }) = -1
                     if (j < mask.len) dig(j) = -dig(j) ^ ~mask.dig(j)
                     else dig(j) = ~(-dig(j)) // -dig[j]^~0
@@ -3078,7 +3236,8 @@ class BigInt extends Number with Comparable[BigInt] {
                   }) {
                     dig(j) ^= mask.dig(j) // ~dig[j]^~mask.dig[j]
                     {
-                      j += 1; j - 1
+                      j += 1;
+                      j - 1
                     }
                   }
                   sign = 1
@@ -3087,7 +3246,8 @@ class BigInt extends Number with Comparable[BigInt] {
                 else while ( {
                   dig(len - 1) == 0 && len > 1
                 }) {
-                  len -= 1; len
+                  len -= 1;
+                  len
                 }
               }
 
@@ -3097,14 +3257,15 @@ class BigInt extends Number with Comparable[BigInt] {
                 * @param mask The number to bitwise-and-not with.
                 * @complexity O(n)
                 */
-              def andNot(mask: BigInt) = {
+              def andNot(mask: BigInt1) = {
                 val mlen = Math.min(len, mask.len)
                 if (sign > 0) if (mask.sign > 0) {
                   var i = 0
                   while ( {
                     i < mlen
                   }) dig(i) &= ~mask.dig(i) {
-                    i += 1; i - 1
+                    i += 1;
+                    i - 1
                   }
                 }
                 else {
@@ -3112,13 +3273,15 @@ class BigInt extends Number with Comparable[BigInt] {
                   while ( {
                     j < mlen && mask.dig(j) == 0
                   }) {
-                    j += 1; j
+                    j += 1;
+                    j
                   }
                   if (j < mlen) {
                     dig(j) &= ~(-mask.dig(j))
                     while ( {
                       {
-                        j += 1; j
+                        j += 1;
+                        j
                       } < mlen
                     }) dig(j) &= mask.dig(j) // ~~mask.dig[j]}
                     len = mlen
@@ -3133,13 +3296,15 @@ class BigInt extends Number with Comparable[BigInt] {
                       while ( {
                         dig(j) == 0
                       }) {
-                        j += 1; j
+                        j += 1;
+                        j
                       }
                       if (j < mlen) {
                         dig(j) = -(-(dig(j)) & ~(mask.dig(j)))
                         while ( {
                           {
-                            j += 1; j
+                            j += 1;
+                            j
                           } < mlen && dig(j - 1) == 0
                         }) dig(j) = -(~(dig(j) | mask.dig(j)))
                         if (j == mlen && dig(j - 1) == 0) {
@@ -3147,7 +3312,8 @@ class BigInt extends Number with Comparable[BigInt] {
                           while ( {
                             j < blen && dig(j) == -1
                           }) dig({
-                            j += 1; j - 1
+                            j += 1;
+                            j - 1
                           }) = 0
                           if (j < blen) dig(j) = -(~dig(j))
                           else {
@@ -3161,7 +3327,8 @@ class BigInt extends Number with Comparable[BigInt] {
                         while ( {
                           j < mlen
                         }) dig(j) |= mask.dig(j) {
-                          j += 1; j - 1
+                          j += 1;
+                          j - 1
                         }
                         if (mask.len > len) len = mask.len
                       }
@@ -3175,7 +3342,8 @@ class BigInt extends Number with Comparable[BigInt] {
                       }) {
                         a = dig(j)
                         b = mask.dig(j) {
-                          j += 1; j
+                          j += 1;
+                          j
                         }
                       }
                       if (a != 0 && b == 0) {
@@ -3183,7 +3351,8 @@ class BigInt extends Number with Comparable[BigInt] {
                         while ( {
                           j < mask.len && mask.dig(j) == 0
                         }) dig(j) ^= -1 {
-                          j += 1; j - 1
+                          j += 1;
+                          j - 1
                         }
                         if (j < len) dig(j) = ~(dig(j) | -(mask.dig(j))) // ~dig[j]&~-mask.dig[j]);
                         else dig(j) = ~(-dig(j)) // dig[j]==mask.dig[j]
@@ -3193,7 +3362,8 @@ class BigInt extends Number with Comparable[BigInt] {
                         while ( {
                           j < mlen && dig(j) == 0
                         }) {
-                          j += 1; j - 1
+                          j += 1;
+                          j - 1
                         }
                         if (j < mlen) dig(j) = -dig(j) & mask.dig(j)
                         j += 1
@@ -3202,7 +3372,8 @@ class BigInt extends Number with Comparable[BigInt] {
                       while ( {
                         j < mlen
                       }) dig(j) = ~dig(j) & mask.dig(j) {
-                        j += 1; j - 1
+                        j += 1;
+                        j - 1
                       }
                       len = mask.len
                       sign = 1
@@ -3211,7 +3382,8 @@ class BigInt extends Number with Comparable[BigInt] {
                   while ( {
                     dig(len - 1) == 0 && len > 1
                   }) {
-                    len -= 1; len
+                    len -= 1;
+                    len
                   }
                 }
 
