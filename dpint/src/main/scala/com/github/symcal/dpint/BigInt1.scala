@@ -606,20 +606,19 @@ class BigInt1 extends Number with Comparable[BigInt1] {
     while ( {
       i < tmp
     }) {
-      dig(i) = v(j + 3) << 24 | (v(j + 2) & 0xFF) << 16 | (v(j + 1) & 0xFF) << 8 | v(j) & 0xFF {
-        i += 1;
-        i - 1
-      }
+      dig(i) = v(j + 3) << 24 | (v(j + 2) & 0xFF) << 16 | (v(j + 1) & 0xFF) << 8 | v(j) & 0xFF
+        i += 1
+
       j += 4
     }
     if (tmp != len) {
       tmp = v({
-        j += 1;
+        j += 1
         j - 1
       }) & 0xFF
       if (j < vlen) {
         tmp |= (v({
-          j += 1;
+          j += 1
           j - 1
         }) & 0xFF) << 8
         if (j < vlen) tmp |= (v(j) & 0xFF) << 16
@@ -656,7 +655,7 @@ class BigInt1 extends Number with Comparable[BigInt1] {
     len = 1
     while ( {
       j < s.length
-    }) mulAdd(1_000_000_000, parse(s, j, j += 9))
+    }) mulAdd(1000000000, parse(s, j, {j += 9; j}))
   }
 
   /**
@@ -679,8 +678,7 @@ class BigInt1 extends Number with Comparable[BigInt1] {
     dig(0) = (`val` & BigInt1.mask).toInt
     dig(1) = (`val` >>> 32).toInt
     if (dig(1) == 0) {
-      len -= 1;
-      len
+      len -= 1
     }
   }
 
@@ -782,10 +780,8 @@ class BigInt1 extends Number with Comparable[BigInt1] {
     while ( {
       i < len
     }) {
-      if (dig(i) != a.dig(i)) return false {
-        i += 1;
-        i - 1
-      }
+      if (dig(i) != a.dig(i)) return false
+              i += 1
     }
     true
   }
@@ -802,10 +798,8 @@ class BigInt1 extends Number with Comparable[BigInt1] {
     var i = 0
     while ( {
       i < len
-    }) hash = (31 * hash + (dig(i) & BigInt1.mask)).toInt {
-      i += 1;
-      i - 1
-    }
+    }) hash = (31 * hash + (dig(i) & BigInt1.mask)).toInt
+      i += 1
     sign * hash //relies on 0 --> hash==0.
   }
 
@@ -854,7 +848,7 @@ class BigInt1 extends Number with Comparable[BigInt1] {
     val exp = (((32 - s + 32L * (len - 1)) - 1 + 127) & 0xFF).toInt
     bits |= exp << 23 //Add exponent.
     bits |= sign & (1 << 31) //Add sign-bit.
-    Float.intBitsToFloat(bits)
+    java.lang.Float.intBitsToFloat(bits)
   }
 
   /** {@inheritDoc }
@@ -875,7 +869,7 @@ class BigInt1 extends Number with Comparable[BigInt1] {
     val exp = ((32 - s + 32L * (len - 1)) - 1 + 1023) & 0x7FF
     bits |= exp << 52
     bits |= sign.toLong & (1L << 63)
-    Double.longBitsToDouble(bits)
+    java.lang.Double.longBitsToDouble(bits)
   }
 
   /**
@@ -896,13 +890,12 @@ class BigInt1 extends Number with Comparable[BigInt1] {
           dig(i)
         } == 0
       }) {
-        i += 1;
-        i - 1
+        i += 1
       }
       if (i == len) {
         if (len == dig.length) realloc()
         dig({
-          len += 1;
+          len += 1
           len - 1
         }) = 1
       }
@@ -925,14 +918,11 @@ class BigInt1 extends Number with Comparable[BigInt1] {
       while ( {
         dig(i) == 0
       }) {
-        {
-          dig(i) -= 1;
-          dig(i)
-        }
-        {
-          i += 1;
-          i - 1
-        }
+
+          dig(i) -= 1
+
+          i += 1
+
       }
       if ( {
         dig(i) -= 1;
@@ -993,9 +983,8 @@ class BigInt1 extends Number with Comparable[BigInt1] {
   def umul(mul: Int): Unit = {
     if (mul == 0) {
       setToZero()
-      return
-      //To be removed?}
-      var carry = 0
+    } else {
+      var carry = 0L
       val m = mul & BigInt1.mask
       var i = 0
       while ( {
@@ -1003,10 +992,8 @@ class BigInt1 extends Number with Comparable[BigInt1] {
       }) {
         carry = (dig(i) & BigInt1.mask) * m + carry
         dig(i) = carry.toInt
-        carry >>>= 32 {
-          i += 1;
-          i - 1
-        }
+        carry >>>= 32
+        i += 1
       }
       if (carry != 0) {
         if (len == dig.length) realloc()
@@ -1026,10 +1013,8 @@ class BigInt1 extends Number with Comparable[BigInt1] {
     def udiv(div: Int) = if (div < 0) safeUdiv(div)
     else unsafeUdiv(div) //returns the unsigned remainder!
     // Assumes div > 0.
-    private def unsafeUdiv(div: Int): Int
 
-    =
-    {
+    private def unsafeUdiv(div: Int): Int = {
       val d = div & BigInt1.mask
       var rem = 0
       var i = len - 1
