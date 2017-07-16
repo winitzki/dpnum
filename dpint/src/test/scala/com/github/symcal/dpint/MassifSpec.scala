@@ -6,13 +6,20 @@ class MassifSpec extends FlatSpec with Matchers {
 
   behavior of "Massif"
 
-  it should "create new Massif of length 1604" in {
-    val m = new Massif[Int](1604, 0)
-    m.length shouldEqual 1604
+  it should "create new Massif of given length" in {
+    Seq[Long](0, 1, 10, 100, 1604, 94000, 200000, 500000, 1000000L).foreach { n ⇒
+      println(s"Creating Massif($n)")
+      val m = new Massif[Int](n, 0)
+      m.length shouldEqual n
+    }
   }
 
-  it should "create new Massif of length 94000" in {
-    val m = new Massif[Int](94000, 0)
-    m.length shouldEqual 94000
+  // This requires -Xmx11G
+  it should "create large Massif of given length" in {
+    // Note: 17L << 27 is larger than signed Int, so we can't make an Array[T] of this size.
+    Seq[Long](17L << 27).foreach { n ⇒
+      val m = new Massif[Int](n, 0)
+      m.length shouldEqual n
+    }
   }
 }

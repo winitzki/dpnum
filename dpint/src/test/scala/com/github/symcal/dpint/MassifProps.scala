@@ -66,7 +66,7 @@ object MassifProps extends Properties("Massif") {
     }
   }
 
-  val mediumInt = Gen.choose(0, 100000)
+  val mediumInt = Gen.choose(0, 1000000)
 
   property("filling with different values") = forAll(mediumInt) { m ⇒
     (m > 0) ==> {
@@ -95,6 +95,25 @@ object MassifProps extends Properties("Massif") {
       a.realloc(n + m, 0)
       a.length == n + m
       val q = (0 until m).map { i ⇒
+        (a(i) == i: Prop)
+      }
+      all(p: _*) && all(q: _*)
+    }
+  }
+
+  property("realloc from big to small preserves values") = forAll(mediumInt, mediumInt) { (m: Int, n: Int) ⇒
+    (m > 0 && n > 0) ==> {
+      val a = new Massif[Int](n + m, 0)
+      a.length == m + n
+      (0 until m + n).foreach { i ⇒
+        a.update(i, i)
+      }
+      val p = (0 until m + n).map { i ⇒
+        (a(i) == i: Prop)
+      }
+      a.realloc(n, 0)
+      a.length == n
+      val q = (0 until n).map { i ⇒
         (a(i) == i: Prop)
       }
       all(p: _*) && all(q: _*)

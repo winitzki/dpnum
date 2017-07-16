@@ -45,7 +45,7 @@ class Massif[@specialized(Int, Long) T: ClassTag](init_length: Long, fill_value:
   realloc(init_length, fill_value)
 }
 
-sealed trait ContainerMassif[@specialized(Int, Long) T] {
+private[dpint] sealed trait ContainerMassif[@specialized(Int, Long) T] {
   def apply(i: Long): T
 
   def update(i: Long, new_value: T): Unit
@@ -96,8 +96,8 @@ private[dpint] class BaseMassif[@specialized(Int, Long) T: ClassTag](init_length
 
   fill(fill_value)
 }
-
-private[dpint] class OverMassif[@specialized(Int, Long) T: ClassTag](scale: Long = Massif.branch_array_length, fill_value: T) extends ContainerMassif[T] {
+//@specialized(Int, Long)
+private[dpint] class OverMassif[T: ClassTag](scale: Long = Massif.branch_array_length, fill_value: T) extends ContainerMassif[T] {
   def apply(i: Long): T = mantissa.apply((i / scale).toInt).apply(i % scale)
 
   /** The length of the `mantissa` array that is currently being used.
@@ -136,7 +136,7 @@ private[dpint] class OverMassif[@specialized(Int, Long) T: ClassTag](scale: Long
       }
     } else if (elements_differ < 0) {
       // We need to use fewer elements of `mantissa`.
-      cfor(new_used_length + 1)(_ < used_length, _ + 1) { i ⇒
+      cfor(new_used_length)(_ < used_length, _ + 1) { i ⇒
         mantissa(i) = null
       }
     } else {
@@ -145,13 +145,13 @@ private[dpint] class OverMassif[@specialized(Int, Long) T: ClassTag](scale: Long
     }
     used_length = new_used_length
     // At this time, `used_length` has been already updated and points to the last used element after all reallocations.
-    mantissa(used_length - 1).realloc(new_size % scale, fill_value)
+    mantissa(used_length - 1).realloc(new_size - scale * (new_used_length - 1), fill_value)
   }
 
   override def get_first: ContainerMassif[T] = mantissa(0)
 }
 
 object Massif {
-  val base_array_length: Int = 1024
-  val branch_array_length: Int = 256
+  val base_array_length: Int = 1 << 12
+  val branch_array_length: Int = 1 << 11
 }
