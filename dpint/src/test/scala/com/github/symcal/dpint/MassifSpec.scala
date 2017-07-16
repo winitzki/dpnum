@@ -7,7 +7,11 @@ class MassifSpec extends FlatSpec with Matchers {
   behavior of "Massif"
 
   it should "create new Massif of given length" in {
-    Seq[Long](0, 1, 10, 100, 1604, 94000, 200000, 500000, 1000000L).foreach { n ⇒
+    Seq[Long](0, 1, 10, 100, 1604, 94000, 200000, 500000, 1000000L,
+      Massif.base_array_length,
+      Massif.base_array_length * Massif.branch_array_length,
+      Massif.base_array_length * Massif.branch_array_length * 2
+    ).foreach { n ⇒
       println(s"Creating Massif($n)")
       val m = new Massif[Int](n, 0)
       m.length shouldEqual n
