@@ -96,8 +96,8 @@ private[dpint] class BaseMassif[@specialized(Int, Long) T: ClassTag](init_length
 
   fill(fill_value)
 }
-//@specialized(Int, Long)
-private[dpint] class OverMassif[T: ClassTag](scale: Long = Massif.branch_array_length, fill_value: T) extends ContainerMassif[T] {
+
+private[dpint] class OverMassif[@specialized(Int, Long) T: ClassTag](scale: Long = Massif.branch_array_length, fill_value: T) extends ContainerMassif[T] {
   def apply(i: Long): T = mantissa.apply((i / scale).toInt).apply(i % scale)
 
   /** The length of the `mantissa` array that is currently being used.
