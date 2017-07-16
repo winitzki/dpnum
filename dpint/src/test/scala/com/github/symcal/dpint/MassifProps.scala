@@ -22,6 +22,8 @@ object MassifProps extends Properties("Massif") {
 
   property("write to array then read") = forAll { (x: Int, y: Int) ⇒
     val a = new Massif[Int](3, x)
+    a.length == 3
+
     a(0) == x
     a(1) == x
     a(2) == x

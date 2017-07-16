@@ -11,8 +11,8 @@ class MassifSpec extends FlatSpec with Matchers {
     m.length shouldEqual 1604
   }
 
-  it should "create new Massif of length 1000" in {
-    val m = new Massif[Int](1000, 0)
-    m.length shouldEqual 1000
+  it should "create new Massif of length 94000" in {
+    val m = new Massif[Int](94000, 0)
+    m.length shouldEqual 94000
   }
 }

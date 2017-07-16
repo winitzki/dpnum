@@ -23,7 +23,8 @@ class Massif[@specialized(Int, Long) T: ClassTag](init_length: Long, fill_value:
   final def realloc(new_size: Long, fill_value: T): Unit = {
     if (new_size > container_massif.max_capacity) { // Need to upgrade our level by create an upper-level `OverMassif`.
       container_massif.realloc(container_massif.max_capacity, fill_value) // Make sure it is full before inserting it into an upper-level `OverMassif`.
-      val new_container = new OverMassif[T](container_massif.scale * Massif.branch_array_length, fill_value)
+      val new_scale = if (container_massif.scale == 1) Massif.base_array_length else container_massif.scale * Massif.branch_array_length
+      val new_container = new OverMassif[T](new_scale, fill_value)
       new_container.set_first(container_massif)
       container_massif = new_container
       realloc(new_size, fill_value) // We may need to repeat this process.
@@ -54,7 +55,7 @@ sealed trait ContainerMassif[T] {
 
   val scale: Long = 1
 
-  val max_capacity: Long = scale * Massif.base_array_length
+  val max_capacity: Long
 
   def realloc(new_size: Long, fill_value: T): Unit
 
@@ -107,6 +108,8 @@ private class OverMassif[T: ClassTag](override val scale: Long = Massif.branch_a
     */
   private var used_length: Int = 0
 
+  override val max_capacity: Long = scale * Massif.branch_array_length
+
   private val mantissa: Array[ContainerMassif[T]] = new Array(Massif.branch_array_length)
 
   override def length: Long = (used_length - 1) * scale + mantissa(used_length - 1).length
@@ -128,7 +131,7 @@ private class OverMassif[T: ClassTag](override val scale: Long = Massif.branch_a
     if (elements_differ > 0) {
       // We need to allocate more elements of `mantissa`.
       cfor(used_length)(_ < new_used_length, _ + 1) { i ⇒
-        mantissa(i) = if (scale > Massif.branch_array_length)
+        mantissa(i) = if (scale > Massif.base_array_length)
           new OverMassif[T](scale / Massif.branch_array_length, fill_value)
         else
           new BaseMassif[T](Massif.base_array_length, fill_value)
