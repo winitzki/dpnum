@@ -71,7 +71,7 @@ private[dpint] class BaseMassif[@specialized(Int, Long) T: ClassTag](init_length
     */
   private var used_length: Int = init_length
 
-  private val mantissa: Array[T] = new Array(Massif.base_array_length)
+  private val mantissa: Array[T] = new Array(Massif.base_array_length) // It seems that writing `Array[T]` here will introduce boxing.
 
   override def max_capacity: Long = Massif.base_array_length
 
