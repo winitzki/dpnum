@@ -1,7 +1,7 @@
 
 val scalaV = "2.12.2"
 
-lazy val root = (project in file(".")).aggregate(dpint)
+lazy val dpnum_root = (project in file(".")).aggregate(dpint)
 
 lazy val dpint = (project in file("dpint"))
   .settings(

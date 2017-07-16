@@ -47,7 +47,7 @@ import java.util.concurrent.*;
  * @author Simon Klein
  * @version 0.7
  */
-public class BigInt extends Number implements Comparable<BigInt1>
+public class BigInt extends Number implements Comparable<BigInt>
 {
     /**
      * Used to cast a (base 2^32) digit to a long without getting unwanted sign extension.
@@ -245,9 +245,9 @@ public class BigInt extends Number implements Comparable<BigInt1>
      * @return The BigInt copy.
      * @complexity	O(n)
      */
-    public BigInt1 copy()
+    public BigInt copy()
     {
-        return new BigInt1(sign, Arrays.copyOf(dig,len), len);
+        return new BigInt(sign, Arrays.copyOf(dig,len), len);
     }
     /**
      * Assigns the given number to this BigInt object.
@@ -255,7 +255,7 @@ public class BigInt extends Number implements Comparable<BigInt1>
      * @param The BigInt to copy/assign to this BigInt.
      * @complexity	O(n)
      */
-    public void assign(final BigInt1 other)
+    public void assign(final BigInt other)
     {
         sign = other.sign;
         assign(other.dig, other.len);
@@ -442,7 +442,7 @@ public class BigInt extends Number implements Comparable<BigInt1>
      * @return	-1 if the absolute value of this number is less, 0 if it's equal, 1 if it's greater.
      * @complexity	O(n)
      */
-    public int compareAbsTo(final BigInt1 a)
+    public int compareAbsTo(final BigInt a)
     {
         if(len>a.len) return 1;
         if(len<a.len) return -1;
@@ -459,7 +459,7 @@ public class BigInt extends Number implements Comparable<BigInt1>
      * @return	-1 if the value of this number is less, 0 if it's equal, 1 if it's greater.
      * @complexity	O(n)
      */
-    public int compareTo(final BigInt1 a)
+    public int compareTo(final BigInt a)
     {
         if(sign<0)
         {
@@ -476,7 +476,7 @@ public class BigInt extends Number implements Comparable<BigInt1>
      * @return	true if the two numbers are equal, false otherwise.
      * @complexity	O(n)
      */
-    public boolean equals(final BigInt1 a)
+    public boolean equals(final BigInt a)
     {
         if(len!=a.len) return false;
         if(isZero() && a.isZero()) return true;
@@ -489,7 +489,7 @@ public class BigInt extends Number implements Comparable<BigInt1>
     @Override
     public boolean equals(final Object o) //Todo: Equality on other Number objects?
     {
-        if(o instanceof BigInt1) return equals((BigInt1)o);
+        if(o instanceof BigInt) return equals((BigInt)o);
         return false;
     }
     /** {@inheritDoc}
@@ -1190,7 +1190,7 @@ public class BigInt extends Number implements Comparable<BigInt1>
      * @param a	The number to add.
      * @complexity	O(n)
      */
-    public void add(final BigInt1 a)
+    public void add(final BigInt a)
     {
         if(sign==a.sign){ addMag(a.dig,a.len); return; }
         if(compareAbsTo(a)>=0)
@@ -1226,7 +1226,7 @@ public class BigInt extends Number implements Comparable<BigInt1>
      * @param a	The number to subtract.
      * @complexity	O(n)
      */
-    public void sub(final BigInt1 a) //Fix naming.
+    public void sub(final BigInt a) //Fix naming.
     {
         if(sign!=a.sign){ addMag(a.dig,a.len); return; }
         if(compareAbsTo(a)>=0)
@@ -1265,7 +1265,7 @@ public class BigInt extends Number implements Comparable<BigInt1>
      * @param mul	The number to multiply with.
      * @complexity	O(n^2) - O(n log n)
      */
-    public void mul(final BigInt1 mul)
+    public void mul(final BigInt mul)
     {
         if(isZero()) return;
         else if(mul.isZero()) setToZero();
@@ -1288,7 +1288,7 @@ public class BigInt extends Number implements Comparable<BigInt1>
      * @param mul	The number to multiply with.
      * @complexity	O(n^2)
      */
-    public void smallMul(final BigInt1 mul)
+    public void smallMul(final BigInt mul)
     {
         if(isZero()) return; //Remove?
         if(mul.isZero()){ setToZero(); return; }
@@ -1310,7 +1310,7 @@ public class BigInt extends Number implements Comparable<BigInt1>
      * @param mul		The number to multiply with.
      * @complexity		O(n^1.585)
      */
-    public void karatsuba(final BigInt1 mul) //Fix naming?
+    public void karatsuba(final BigInt mul) //Fix naming?
     {
         karatsuba(mul,false);
     }
@@ -1322,7 +1322,7 @@ public class BigInt extends Number implements Comparable<BigInt1>
      * @param parallel	true if we should try to parallelize the algorithm, false if we shouldn't.
      * @complexity		O(n^1.585)
      */
-    public void karatsuba(final BigInt1 mul, final boolean parallel) //Not fully tested on small numbers... Fix naming?
+    public void karatsuba(final BigInt mul, final boolean parallel) //Not fully tested on small numbers... Fix naming?
     {
         if(mul.dig.length<len) mul.realloc(len);
         else if(dig.length<mul.len) realloc(mul.len);
@@ -1579,7 +1579,7 @@ public class BigInt extends Number implements Comparable<BigInt1>
      * @param div	The number to divide with.
      * @complexity	O(n^2)
      */
-    public void div(final BigInt1 div)
+    public void div(final BigInt div)
     {
         if(div.len==1){ sign *= div.sign; udiv(div.dig[0]); return; }
 
@@ -1601,7 +1601,7 @@ public class BigInt extends Number implements Comparable<BigInt1>
      * @param div	The number to use in the division causing the remainder.
      * @complexity	O(n^2)
      */
-    public void rem(final BigInt1 div)
+    public void rem(final BigInt div)
     {
         // -7/-3 = 2, 2*-3 + -1
         // -7/3 = -2, -2*3 + -1
@@ -1627,19 +1627,19 @@ public class BigInt extends Number implements Comparable<BigInt1>
      * @return		The remainder.
      * @complexity	O(n^2)
      */
-    public BigInt1 divRem(final BigInt1 div)
+    public BigInt divRem(final BigInt div)
     {
         int tmp = sign;
-        if(div.len==1){ sign *= div.sign; return new BigInt1(tmp, udiv(div.dig[0])); }
+        if(div.len==1){ sign *= div.sign; return new BigInt(tmp, udiv(div.dig[0])); }
 
         tmp = compareAbsTo(div);
         if(tmp<0)
         {
-            final BigInt1 cpy = new BigInt1(sign,dig,len);
+            final BigInt cpy = new BigInt(sign,dig,len);
             dig = new int[2]; len = 1; //setToZero()
             return cpy;
         }
-        if(tmp==0){ uassign(1, sign *= div.sign); return new BigInt1(1,0); }
+        if(tmp==0){ uassign(1, sign *= div.sign); return new BigInt(1,0); }
 
         final int[] q = new int[len-div.len+1];
         if(len==dig.length) realloc(len+1); //We need an extra slot.
@@ -1652,7 +1652,7 @@ public class BigInt extends Number implements Comparable<BigInt1>
         tmp = div.len;
         while(tmp>1 && r[tmp-1]==0) --tmp;
         sign *= div.sign;
-        return new BigInt1(sign/div.sign, r, tmp);
+        return new BigInt(sign/div.sign, r, tmp);
     }
     /**
      * Divides the first magnitude u[0..m) by v[0..n) and stores the resulting quotient in q.
@@ -2106,7 +2106,7 @@ public class BigInt extends Number implements Comparable<BigInt1>
      * @param mask	The number to bitwise-and with.
      * @complexity	O(n)
      */
-    public void and(final BigInt1 mask)
+    public void and(final BigInt mask)
     {
         if(sign>0)
         {
@@ -2227,7 +2227,7 @@ public class BigInt extends Number implements Comparable<BigInt1>
      * @param mask	The number to bitwise-or with.
      * @complexity	O(n)
      */
-    public void or(final BigInt1 mask)
+    public void or(final BigInt mask)
     {
         if(sign>0)
         {
@@ -2334,7 +2334,7 @@ public class BigInt extends Number implements Comparable<BigInt1>
      * @param mask	The number to bitwise-xor with.
      * @complexity	O(n)
      */
-    public void xor(final BigInt1 mask)
+    public void xor(final BigInt mask)
     {
         if(sign>0)
         {
@@ -2452,7 +2452,7 @@ public class BigInt extends Number implements Comparable<BigInt1>
      * @param mask	The number to bitwise-and-not with.
      * @complexity	O(n)
      */
-    public void andNot(final BigInt1 mask)
+    public void andNot(final BigInt mask)
     {
         final int mlen = Math.min(len, mask.len);
         if(sign>0)
