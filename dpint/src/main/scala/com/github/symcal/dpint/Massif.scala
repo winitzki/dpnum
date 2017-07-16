@@ -9,7 +9,7 @@ import spire.syntax.cfor._
   * New memory allocations are limited to arrays of fixed base length.
   **/
 class Massif[@specialized(Int, Long) T: ClassTag](init_length: Long, fill_value: T) {
-  private var container_massif: ContainerMassif[T] = new BaseMassif[T](math.min(init_length, Massif.base_array_length).toInt, fill_value)
+  private[dpint] var container_massif: ContainerMassif[T] = new BaseMassif[T](math.min(init_length, Massif.base_array_length).toInt, fill_value)
 
   def apply(i: Long): T = container_massif.apply(i)
 
@@ -23,7 +23,7 @@ class Massif[@specialized(Int, Long) T: ClassTag](init_length: Long, fill_value:
   final def realloc(new_size: Long, fill_value: T): Unit = {
     if (new_size > container_massif.max_capacity) { // Need to upgrade our level by create an upper-level `OverMassif`.
       container_massif.realloc(container_massif.max_capacity, fill_value) // Make sure it is full before inserting it into an upper-level `OverMassif`.
-      val new_scale = if (container_massif.scale == 1) Massif.base_array_length else container_massif.scale * Massif.branch_array_length
+      val new_scale = container_massif.max_capacity
       val new_container = new OverMassif[T](new_scale, fill_value)
       new_container.set_first(container_massif)
       container_massif = new_container
@@ -45,17 +45,14 @@ class Massif[@specialized(Int, Long) T: ClassTag](init_length: Long, fill_value:
   realloc(init_length, fill_value)
 }
 
-//@specialized(Int, Long) T
-sealed trait ContainerMassif[T] {
+sealed trait ContainerMassif[@specialized(Int, Long) T] {
   def apply(i: Long): T
 
   def update(i: Long, new_value: T): Unit
 
   def length: Long
 
-  val scale: Long = 1
-
-  val max_capacity: Long
+  def max_capacity: Long
 
   def realloc(new_size: Long, fill_value: T): Unit
 
@@ -64,7 +61,7 @@ sealed trait ContainerMassif[T] {
   def get_first: ContainerMassif[T]
 }
 
-private class BaseMassif[T: ClassTag](init_length: Int, fill_value: T) extends ContainerMassif[T] {
+private[dpint] class BaseMassif[@specialized(Int, Long) T: ClassTag](init_length: Int, fill_value: T) extends ContainerMassif[T] {
   def apply(i: Long): T = mantissa.apply(i.toInt)
 
   override def update(i: Long, new_value: T): Unit = mantissa.update(i.toInt, new_value)
@@ -76,7 +73,7 @@ private class BaseMassif[T: ClassTag](init_length: Int, fill_value: T) extends C
 
   private val mantissa: Array[T] = new Array(Massif.base_array_length)
 
-  override val max_capacity: Long = Massif.base_array_length
+  override def max_capacity: Long = Massif.base_array_length
 
   override def length: Long = used_length
 
@@ -99,8 +96,8 @@ private class BaseMassif[T: ClassTag](init_length: Int, fill_value: T) extends C
 
   fill(fill_value)
 }
-// [@specialized(Int, Long) T]pp[
-private class OverMassif[T: ClassTag](override val scale: Long = Massif.branch_array_length, fill_value: T) extends ContainerMassif[T] {
+
+private[dpint] class OverMassif[@specialized(Int, Long) T: ClassTag](scale: Long = Massif.branch_array_length, fill_value: T) extends ContainerMassif[T] {
   def apply(i: Long): T = mantissa.apply((i / scale).toInt).apply(i % scale)
 
   /** The length of the `mantissa` array that is currently being used.

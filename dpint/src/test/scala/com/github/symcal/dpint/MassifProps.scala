@@ -1,7 +1,8 @@
 package com.github.symcal.dpint
 
-import org.scalacheck.Prop.{BooleanOperators, forAll}
-import org.scalacheck.{Gen, Properties}
+import org.scalacheck.Prop.{BooleanOperators, all, forAll}
+import org.scalacheck.{Gen, Prop, Properties}
+import spire.syntax.cfor
 
 object MassifProps extends Properties("Massif") {
   val positiveInt = Gen.choose(0, 1 << 20)
@@ -9,7 +10,7 @@ object MassifProps extends Properties("Massif") {
   property("correct initial length") = forAll(positiveInt) { (n: Int) ⇒
     (n > 0) ==> {
       val l = new Massif[Int](n, 0).length
-//      println(s"initial length with n=$n is $l")
+      //      println(s"initial length with n=$n is $l")
       l == n
     }
   }
@@ -47,14 +48,56 @@ object MassifProps extends Properties("Massif") {
     }
   }
 
-  property("realloc from small to big size assigns correct new length") = forAll(smallInteger, positiveInt) { (m: Int, n: Int) ⇒
+  property("realloc from small to big size assigns correct new length") = forAll(smallInteger, positiveInt, positiveInt) { (m: Int, n: Int, n2: Int) ⇒
+    (m > 0 && n > 0 && n2 > 0) ==> {
+      val a = new Massif[Int](m + 1, 0)
+      a.length == m + 1
+      a(m) == 0
+      a.realloc(n + 1, 0)
+      a.length == n + 1
+      a.update(n, 123)
+      a(n) == 123
+      a.realloc(n2 + 1, 0)
+      a.length == n2 + 1
+      a.update(n2, 125)
+      a(n2) == 125
+      a.realloc(m + 1, 0)
+      a.length == m + 1
+    }
+  }
+
+  val mediumInt = Gen.choose(0, 100000)
+
+  property("filling with different values") = forAll(mediumInt) { m ⇒
+    (m > 0) ==> {
+      val a = new Massif[Int](m, 0)
+      a.length == m
+      (0 until m).foreach { i ⇒
+        a.update(i, i)
+      }
+      val p = (0 until m).map { i ⇒
+        (a(i) == i: Prop)
+      }
+      all(p: _*)
+    }
+  }
+
+  property("realloc from small to big preserves values") = forAll(mediumInt, mediumInt) { (m: Int, n: Int) ⇒
     (m > 0 && n > 0) ==> {
       val a = new Massif[Int](m, 0)
       a.length == m
-      a.realloc(n, 0)
-      a.length == n
-      a.realloc(m + 1, 0)
-      a.length == m + 1
+      (0 until m).foreach { i ⇒
+        a.update(i, i)
+      }
+      val p = (0 until m).map { i ⇒
+        (a(i) == i: Prop)
+      }
+      a.realloc(n + m, 0)
+      a.length == n + m
+      val q = (0 until m).map { i ⇒
+        (a(i) == i: Prop)
+      }
+      all(p: _*) && all(q: _*)
     }
   }
 }
