@@ -1,4 +1,4 @@
-package com.github.symcal.dpint
+package com.github.symcal.dp
 
 import org.scalacheck.Prop.{BooleanOperators, all, forAll}
 import org.scalacheck.{Gen, Prop, Properties}

@@ -1,4 +1,4 @@
-package com.github.symcal.dpint;
+package com.github.symcal.dp;
 
 /*
 Copyright (c) 2015-2016 The Huldra Project.

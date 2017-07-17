@@ -1,6 +1,6 @@
-package com.github.symcal.dpint
+package com.github.symcal.dp
 
-import com.github.symcal.dpint.DPInt.unsigned_less_than
+import com.github.symcal.dp.DPInt.unsigned_less_than
 import org.scalatest.{FlatSpec, Matchers}
 import spire.syntax.cfor.cfor
 

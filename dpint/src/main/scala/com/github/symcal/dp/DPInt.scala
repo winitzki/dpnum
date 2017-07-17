@@ -1,4 +1,4 @@
-package com.github.symcal.dpint
+package com.github.symcal.dp
 
 import DPInt._
 
