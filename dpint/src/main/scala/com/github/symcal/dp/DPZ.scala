@@ -22,15 +22,17 @@ class DPZ {
 
   override def toString: String = stringForm()
 
-  def nonZero: Boolean = used_length > 1 || mantissa(0) != 0
+  def nonZero: Boolean = !isZero
 
-  def stringForm(base: Short = 10): String = {
+  def isZero: Boolean = used_length <= 1 && mantissa(0) == 0
+
+  def stringForm(base: Char = 10): String = {
     val capacity: Int = 2 + (used_length * math.log(DPZ.base_bits) / math.log(base)).toInt
     val res = new java.lang.StringBuilder(capacity)
 
-    val divided = new DPZ(this).abs()
+    val divided = DPZ(this).abs()
     do {
-      val digit = div_mod(divided, divided, base)
+      val digit = div_mod(divided, base, divided)
       res.append(digit_to_char(digit))
     } while (divided.nonZero)
     res.reverse
@@ -52,6 +54,7 @@ class DPZ {
 
   def set(x: Int): DPZ = DPZ.set(this, x)
 
+  def set(s: String, b: Char = 10): DPZ = DPZ.set(this, s, b)
 }
 
 object DPZ {
@@ -113,13 +116,15 @@ object DPZ {
     res
   }
 
-  def set(dpz: DPZ, s: String, b: Short = 10): DPZ = {
-    if (s(0) == '-') set(dpz, s.substring(1), b).negate()
-    else set(dpz, get_dpz(DPZ(0), s, 0, b))
+  def set(dpz: DPZ, s: String, b: Char = 10): DPZ = {
+    if (s(0) == '-')
+      set(dpz, get_dpz(DPZ(0), s, 1, b)).negate()
+    else
+      set(dpz, get_dpz(DPZ(0), s, 0, b))
   }
 
   @tailrec
-  private def get_dpz(acc: DPZ, s: String, offset: Int, b: Short): DPZ = {
+  private def get_dpz(acc: DPZ, s: String, offset: Int, b: Char): DPZ = {
     val c = s(offset) - '0'
     val digit = if (c < 10) c else s(offset) - 'A'
     add(acc, digit, acc)
@@ -135,9 +140,15 @@ object DPZ {
 
   def add(src: DPZ, x: Int, dst: DPZ): DPZ = ???
 
-  def div_mod(src: DPZ, dst: DPZ, x: Int): Int = ???
+  def sub(src: DPZ, x: Int, dst: DPZ): DPZ = ???
 
-  /** Low-level short addition for positive DP numbers. Reads from the source array, adds a short number, writes result to the destination array, returns carry bit.
+  def add(src1: DPZ, src2: DPZ, dst: DPZ): DPZ = ???
+
+  def sub(src: DPZ, src2: DPZ, dst: DPZ): DPZ = ???
+
+  def div_mod(src: DPZ, x: Int, dst: DPZ): Int = ???
+
+  /** Low-level Char addition for positive DP numbers. Reads from the source array, adds a Char number, writes result to the destination array, returns carry bit.
     *
     * @param src        Source array.
     * @param dst        Destination array; could be the same as the source array.
@@ -149,7 +160,7 @@ object DPZ {
     */
   private[dp] def add_low_level(src: Coll, offset_src: Int, dst: Coll, offset_dst: Int, count: Int, x: Int): Int = ???
 
-  /** Low-level short subtraction for positive DP numbers. Reads from the source array, subtracts a short number, writes result to the destination array, returns borrow bit.
+  /** Low-level Char subtraction for positive DP numbers. Reads from the source array, subtracts a Char number, writes result to the destination array, returns borrow bit.
     * Note: If borrow is nonzero, the entire array may need to be negated.
     *
     * @param src        Source array.
@@ -180,6 +191,10 @@ object DPZ {
     ???
   }
 
+  def div_mod(src1: DPZ, src2: DPZ, dst: DPZ): DPZ = {
+    ???
+  }
+
   def square(src: DPZ, dst: DPZ): Unit = {
     ???
   }
@@ -199,5 +214,35 @@ object DPZ {
       acc
     } else // Zero or negative power specified - return.
       acc
+  }
+
+  private def less_than(src: Coll, src_offset: Int, dst: Coll, dst_offset: Int, count: Int): Boolean = ???
+
+  private def mantissa_is_equal_until(src: DPZ, dst: DPZ): Int = {
+    var i = 0
+    val len = math.min(src.used_length, dst.used_length)
+    while(i < len && src.mantissa(i) == dst.mantissa(i)) {
+      i += 1
+    }
+    i
+  }
+
+  def equal_to(src: DPZ, dst: DPZ): Boolean = {
+    src.used_length == dst.used_length && (src.is_negative && dst.is_negative || !src.is_negative && !dst.is_negative) && mantissa_is_equal_until(src, dst) == src.used_length
+  }
+
+  private def abs_value_is_less(src: DPZ, dst: DPZ): Boolean = {
+    dst.used_length > src.used_length || dst.used_length == src.used_length && {
+      val index = mantissa_is_equal_until(src, dst)
+      src.mantissa(index) < dst.mantissa(index)
+    }
+  }
+
+  def less_than(src: DPZ, dst: DPZ): Boolean = {
+    if (dst.is_negative) {
+      src.is_negative && abs_value_is_less(dst, src)
+    } else {
+      src.is_negative || abs_value_is_less(src, dst)
+    }
   }
 }
